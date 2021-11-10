@@ -1,0 +1,2088 @@
+
+/*
+ program id: 5354693831639040
+ 
+ api stuffs
+ 
+  authorKaid: kaid_129428899791640004323186
+  authorNickname: Shipment22
+  created: 2021-02-24T20:23:41Z
+  flaggedByUser: false
+  key: ag5zfmtoYW4tYWNhZGVteXIXCxIKU2NyYXRjaHBhZBiAgN39jMLBCQw
+  spinoffCount: 0
+  sumVotesIncremented: 1
+  thumb: /computer-programming/dinos-002/5354693831639040/5724683667718144.png
+  title: dinos-0.0.2
+  translatedTitle: dinos-0.0.2
+  url: https://www.khanacademy.org/computer-programming/dinos-002/5354693831639040
+*/
+
+
+
+/**
+ * this may or may not be the current version go to: https://www.khanacademy.org/computer-programming/pjs/5220148804272128
+ * for the current version
+ * 
+ * Have any suggestions, or wan't to help tell me in the T&T
+ * 
+ * If you spot an error or typo i would be glad if you
+ * informed me.
+ * 
+ * for a better experience go to:
+ * https://www.khanacademy.org/computer-programming/pc-collab/5220148804272128?width=1000&&height=600&&editor=no
+ * note that some apps may not work properly but other will work better
+ * 
+ * > there is now a calculator thanks to: Awesome Man 21, and Me
+ * Full Change Log:
+ * {
+ * Features & Updates:
+ * > = added
+ * < = remove
+ * ^ = updated 
+ * ! = anouncement
+ * 
+ * > Loading screen scene 
+ * > login scene 
+ * > desktop scene 
+ * > settings scene
+ * > home menu scene 
+ * > restart scene 
+ * > sleep scene 
+ * > apps
+ * > painting game
+ * > checkboxes
+ * ^ Checkboxes now work
+ * > disabling sound effects
+ * > more settings like background
+ * > key & star functions by: Awesome man 21
+ * > mouse over apps for name
+ * < removed sound effects (they were too loud)
+ * > Fish Tank App
+ * ^ username & password now work
+ * ^ doc displays over apps and move in and out
+ * > now apps can be minimized
+ * > if you press Shift + Q it will quit the app that open
+ * > if you press Shift + M it will minimize the open app
+ * > there is now a calculator thanks to: Awesome Man 21, and Me
+ * }
+ * 
+ * credit:
+ * Awesome Man 21: for helping as a collaborater.
+ * 𝙳𝙰𝙲𝚘𝚍𝚎𝚛:
+ * for leting us use his game at: https://www.khanacademy.org/computer-programming/duck-hunter/4858011943649280
+ * however it does not work yet and will break the program when you play it.
+**/
+
+
+frameRate(70);
+var canvas = size(width,height, P2D);
+
+
+var system, user, apps, pref, setupUser;
+var s; // system alias
+
+var clicking = false, clickTime = 0;
+var clicking1 = false, clickTime1 = 0;
+var keys = [], typeing = false, keyTime = 0;
+
+//Global Functions {
+function toImg (func,x,y,w,h) {
+    func();
+    
+    return get(x, y, w, h);
+}
+function button (x,y, width,height, name, callback, bgColor,fillColor, round) {
+    if (bgColor === undefined) {
+        bgColor = color(255, 255, 255);
+    }
+    if (fillColor === undefined) {
+        fillColor = color(0, 0, 0);
+    }
+    if (round === undefined) {round = 2;}
+    strokeWeight(0.5);
+        fill(bgColor);
+        rect(x,y,width,height, round);
+        pushMatrix();
+        textAlign(CENTER,CENTER);
+        fill(fillColor);
+        text(name, x+width/2, y+height/2);
+        popMatrix();
+    if (mouseX > x && mouseY > y && mouseX < x + width && mouseY < y + height && clicking) {
+        callback();
+    }
+     if (mouseX > x && mouseY > y && mouseX < x + width && mouseY < y + height) {
+        system.cursors.current = system.cursors.pointer;
+    }
+}
+
+function checkbox (x,y, Text, variable, val,val1, checkedColor, font, space) {
+    if (checkedColor === undefined) {
+        checkedColor = color(34, 255, 0);
+    }
+    if (font === undefined) {
+        font = system.fonts.mono;
+    }
+    if (val === undefined) {
+            val = true;
+            val1 = false;
+    }
+    if (space === undefined) {
+        space = 5.5;
+    }
+    
+    if (variable === val) {
+        fill(checkedColor);
+    }  else {
+        fill(user.pref.scheme.input.bg);
+    }
+    stroke(user.pref.scheme.input.stroke);
+    strokeWeight(0.5);
+    rect(x,y-7.5,15,15,1.5);
+    
+    if (variable === val) {
+         stroke(user.pref.scheme.input.check);
+        strokeWeight(1.5);
+        line(x+4,y+2,x+7,y+5);
+        line(x+11,y-2,x+7,y+5);
+    }
+   
+    
+    fill(user.pref.scheme.color);
+    textFont(font,16);
+    text(Text,x-Text.length*space,y);
+    
+    if (mouseX > x && mouseX < x+15 && mouseY > y-7.5 && mouseY < y + 7.5) {
+        system.cursors.current = system.cursors.pointer;
+    }
+    
+    if (mouseX > x && mouseX < x+15 && mouseY > y-7.5 && mouseY < y + 7.5 && clicking1) {
+        
+        if (variable === val) {
+            return val1;
+        } else {return val;}
+    } else {return variable;}
+}
+function Input(x,y, w,h, placeHolder) {
+    this.x = x;
+    this.y = y;
+    this.h = h;
+    this.w = w;
+    
+    this.focused = false;
+    
+    this.placeHolder = placeHolder;
+    this.placeHolderColor = color(110, 110, 110);
+    this.placeHolderTxtSize = 11;
+    
+    this.color = color(20, 20, 20);
+    this.stroke = color(110);
+    this.focusStroke = color(23, 23, 23);
+    this.bg = color(250, 250, 250);
+    
+    this.txtSize = 15;
+    this.txt = [];
+    
+    this.draw = function() {
+        if (mouseX > this.x && mouseX < this.x+this.w && mouseY > this.y && mouseY < this.y +this.h && clicking) {
+            this.focused = true;
+        } else if (clicking) {
+            this.focused = false;
+        }
+        
+        if (typeing && this.focused && this.txt.length*(this.txtSize*0.55) < this.w) {
+            if (keys[8]) {
+                this.txt.splice(this.txt.length-1,2);
+            } else {
+                this.txt.push(key);
+            }
+        }
+        
+        pushMatrix();
+        if (this.focused) {
+            stroke(this.focusStroke);
+        } else {
+            stroke(this.stroke);
+        }
+        fill(this.bg);
+        rect(this.x,this.y,this.w,this.h,2);
+        
+        textSize(this.placeHolderTxtSize);
+        fill(this.placeHolderColor);
+        text(this.placeHolder,this.x+4,this.y+this.txtSize);
+        
+        fill(this.bg);
+        noStroke();
+        rect(this.x+1,this.y+1,this.txt.length*(this.txtSize/2),this.h-1,2);
+        
+        textSize(this.txtSize);
+        fill(this.color);
+        for (var i = 0 ; i < this.txt.length ; i++) {
+            text(this.txt[i],3+this.x+i*this.txtSize/2,this.y+this.txtSize);  
+        }
+        if (frameCount%80 > 40 && this.focused) {
+            text('|',3+this.x+this.txt.length*this.txtSize/2,this.y+this.txtSize); 
+        }
+        popMatrix();
+    };
+}
+
+// functions by Awesome Man 21 {
+var star = function(x, y, size, points){
+    size=abs(size);
+    points=abs(points);
+    //rotate yellow triangle around center point
+    for(var i = 0; i<360; i+=360/points){
+            pushMatrix();
+            translate(x, y);
+            scale((size/100)*points/10);
+            noStroke();
+            rotate(i);
+            triangle(-360/points, 0, 360/points, 0, 0, 360/(points/2));
+            popMatrix();
+        }
+    };
+    
+var key_key = function(x,y){
+    noStroke();
+    ellipse(x,y,15,15);
+    rect(x,y-5,33,7);
+    rect(x+20,y,5,10);
+    rect(x+28,y,5,10);
+};
+//}
+//}
+
+system = {
+    //crap {
+    time: 0,
+    SFX: true,
+    userNameBox: new Input(width/2-75,137,150,20,'UserName'),
+    passwordBox: new Input(width/2-75,163,150,20,'Password'),
+    doc_width: 10,
+    //}
+    
+    //assets {
+    img: {
+        trex: [],
+        fish: null,
+    },
+    fonts: {
+        sans_serif: createFont('gill sans'),
+        serif: createFont('bodoni 72'),
+        mono: createFont('andale mono'),
+        emoji: createFont('apple color emoji'),
+    },
+    //}
+    
+    //cursors {
+    cursors: {
+        default: function () {
+            fill(25, 35, 25);
+            stroke(255, 255, 255);
+            strokeWeight(1);
+            triangle(mouseX,mouseY,mouseX-4,mouseY+20,mouseX+10,mouseY+18);
+        },
+        text: function () {},
+        pointer: function () {
+            pushMatrix();
+            this.s = 0.8;
+            
+            stroke(20);
+            strokeWeight(5*this.s);
+            line(mouseX,mouseY,mouseX,mouseY+15*this.s);
+            line(mouseX+4*this.s,mouseY+7*this.s,mouseX+5*this.s,mouseY+15*this.s);
+            line(mouseX+8*this.s,mouseY+7.5*this.s,mouseX+10*this.s,mouseY+15*this.s);
+            line(mouseX+12*this.s,mouseY+10*this.s,mouseX+11*this.s,mouseY+15*this.s);
+            line(mouseX,mouseY+17*this.s,mouseX+10*this.s,mouseY+17*this.s);
+            line(mouseX-5*this.s,mouseY+10*this.s,mouseX,mouseY+15*this.s);
+            
+            
+            stroke(255, 255, 255);
+            strokeWeight(3*this.s);
+            line(mouseX,mouseY,mouseX,mouseY+15*this.s);
+            line(mouseX+4*this.s,mouseY+7*this.s,mouseX+5*this.s,mouseY+15*this.s);
+            line(mouseX+8*this.s,mouseY+7.5*this.s,mouseX+10*this.s,mouseY+15*this.s);
+            line(mouseX+12*this.s,mouseY+10*this.s,mouseX+11*this.s,mouseY+15*this.s);
+            line(mouseX,mouseY+17*this.s,mouseX+10*this.s,mouseY+17*this.s);
+            line(mouseX-5*this.s,mouseY+10*this.s,mouseX,mouseY+15*this.s);
+            
+            fill(255, 255, 255);
+            rect(mouseX,mouseY+10*this.s,3*this.s,3*this.s);
+            rect(mouseX,mouseY+11*this.s,10*this.s,3*this.s);
+            
+            popMatrix();
+        },
+        grab: function () {},
+        cross: function () {
+            this.s = 7;
+            
+            stroke(255);
+            strokeWeight(3);
+            line(mouseX-this.s,mouseY,mouseX+this.s,mouseY);
+            line(mouseX,mouseY-this.s,mouseX,mouseY+this.s);
+            
+            stroke(20);
+            strokeWeight(1);
+            line(mouseX-this.s,mouseY,mouseX+this.s,mouseY);
+            line(mouseX,mouseY-this.s,mouseX,mouseY+this.s);
+        },
+        cell: function () {
+            this.i = 7;
+            this.j = 4;
+            
+            stroke(255, 255, 255);
+            strokeWeight(4);
+            line(mouseX-this.i-1,mouseY,mouseX-this.j-1,mouseY);
+            line(mouseX,mouseY-this.i-1,mouseX,mouseY-this.j-1);
+            line(mouseX+this.i,mouseY,mouseX+this.j,mouseY);
+            line(mouseX,mouseY+this.i,mouseX,mouseY+this.j);
+            
+            stroke(20, 20, 20);
+            strokeWeight(2);
+            line(mouseX-this.i-1,mouseY,mouseX-this.j-1,mouseY);
+            line(mouseX,mouseY-this.i-1,mouseX,mouseY-this.j-1);
+            line(mouseX+this.i,mouseY,mouseX+this.j,mouseY);
+            line(mouseX,mouseY+this.i,mouseX,mouseY+this.j);
+            
+            stroke(255, 0, 0);
+            point(mouseX,mouseY);
+        },
+    },
+    //}
+    
+    // scenes {
+    start: function () {
+        var x = 170;
+        var y = 180;
+        
+        fill(100,150,0);
+        textMode(CORNER);
+        textFont(system.fonts.mono,45);
+        if (frameCount%45 < 15) {
+            image(system.img.trex[0],0,0);
+        } else 
+        if (frameCount%45 < 30) {
+            image(system.img.trex[1],0,0);
+        } else 
+        if (frameCount%45 < 45) {
+            image(system.img.trex[2],0,0);
+        } 
+        
+        text('Loading...',270,200);
+        
+        if (frameCount%400 > 198) {
+            system.scene = system.login;
+        }
+    },
+    restart: function () {
+        background(20,25,20);
+        if (frameCount%100 > 50){
+            Program.restart();
+        }
+    },
+    sleep: function () {
+        background(20,25,20);
+        
+        if (frameCount > 70*2) {
+            frameCount = 0;
+        } else
+        if (frameCount > 10) {
+        if (mouseIsPressed || keyIsPressed) {
+            system.scene = system.login;
+        }
+        }
+    },
+    login: function () {
+        user.pref.background();
+        
+        fill(224, 255, 254,230);
+        rect(width/2-100,130,200,60,5);
+        
+        textFont(s.fonts.mono);
+        textAlign(CORNER);
+        strokeWeight(1);
+        s.userNameBox.draw();
+        s.passwordBox.draw();
+        
+        textFont(system.fonts.serif);
+        button(width/2-40,200, 70,40, 'Login', function () {
+            if (join(s.userNameBox.txt,'') === 'dev' && join(s.passwordBox.txt,'') === 'purpledinosuar') {
+                setupUser(0);
+                system.scene = system.desktop;
+            } else if (join(s.userNameBox.txt,'') === 'dev2' && join(s.passwordBox.txt,'') === 'password') {
+                setupUser(1);
+                system.scene = system.desktop;
+            }
+        }, color(23, 0, 125), color(255, 255, 255), 1);
+        
+        if (intersect(width/2-40,200,width/2+35,240,mouseX,mouseY,mouseX,mouseY)) {
+                fill(255, 255, 0);
+                key_key(mouseX-10,mouseY+30);
+        }
+        textFont(system.fonts.serif);
+        button(width-120,height-40, 120,40, 'Login as Guest', function () {
+            system.scene = system.desktop;
+        }, color(23, 0, 125), color(255, 255, 255), 3);
+        
+    },
+    dashboard: function () {
+        background(user.pref.scheme.bg);
+        
+        fill(user.pref.scheme.color);
+        textFont(system.fonts.serif,40);
+        text('Hello, Welcome back '+user.name,width/2,70);
+        
+        //buttons {
+        textFont(system.fonts.sans_serif,13);
+        
+        button(width/2-170,160, 150,100, 'DeskTop', function(){
+        system.scene = system.desktop;
+        }, color(237, 237, 237), color(20, 20, 20), 3);
+        
+        button(width/2+20,160, 150,100, 'Settings', function(){
+        system.scene = system.settings;
+        }, color(237, 237, 237), color(20, 20, 20), 3);
+        
+        button(width/2-170,280, 150,100, 'Restart', function(){
+        system.scene = system.restart;
+        }, color(237, 237, 237), color(20, 20, 20), 3);
+        
+        button(width/2+20,280, 150,100, 'Sleep', function(){
+        system.scene = system.sleep;
+        }, color(237, 237, 237), color(20, 20, 20), 3);
+        //}
+    },
+    desktop: function () {
+        user.pref.background();
+        
+        for (var i = 0 ; i < apps.length ; i++) {
+            if (apps[i].open) {
+                apps[i].display();
+                if (keys[16]) {
+                    if (keys[81]) {
+                        apps[i].open = false;
+                    } else if (keys[77]) {
+                        apps[i].open = false;
+                        apps[i].minimized = true;
+                    }
+                }
+            }
+        }
+        
+        fill(user.pref.scheme.bg);
+        stroke(user.pref.scheme.input.stroke);
+        strokeWeight(0.5);
+        rect(0,0,s.doc_width+1,height);
+        
+        if (mouseX < s.doc_width && s.doc_width < user.pref.doc_width) {
+            s.doc_width+=10;
+        } else if (s.doc_width > 12 && mouseX > s.doc_width) {
+            s.doc_width-=10;
+        }
+       
+        
+        for (var i = 0 ; i < apps.length ; i++) {
+            pushMatrix();
+            translate((-user.pref.doc_width)+s.doc_width,i*user.pref.doc_width);
+            apps[i].icon();
+            popMatrix();
+            
+            if (mouseX < s.doc_width && mouseY > i*user.pref.doc_width && mouseY < user.pref.doc_width+i*user.pref.doc_width) {
+                pushMatrix();
+                fill(user.pref.scheme.bg);
+                stroke(user.pref.scheme.color);
+                rect(55,mouseY,apps[i].name.length*10,20,1);
+                
+                fill(user.pref.scheme.color);
+                textMode(CORNER);
+                textFont(system.fonts.mono,12);
+                text(apps[i].name,50+apps[i].name.length*5,mouseY+10);
+                popMatrix();
+                
+                if (clicking) {
+                    if (!apps[i].minimized) {
+                        apps[i].setup();
+                    }
+                    apps[i].minimized = false;
+                    apps[i].open = true;
+                }
+            }
+        }
+    },
+    settings: function () {
+        background(user.pref.scheme.bg);
+        
+        button(1,1, 45,30,'⤺',function () {
+            system.scene = system.desktop;
+        }, user.pref.scheme.button.bg, user.pref.scheme.button.color,1);
+        
+        user.pref.scheme = checkbox(500,100, 'light scheme',user.pref.scheme,pref.schemes.light,pref.schemes.dark);
+        
+        textFont(system.fonts.serif,30);
+        text('Desktop Background',300,170);
+        button(50,200, 150,100, 'Green', function(){
+            user.pref.background = pref.backgrounds.green;
+        }, color(20,25,20), color(106, 199, 0),5);
+        
+        button(220,200, 150,100, 'Purple', function(){
+            user.pref.background = pref.backgrounds.purple;
+        }, color(33,0,77), color(255, 255, 255),5);
+        
+        button(390,200, 150,100, 'Orange', function(){
+            user.pref.background = pref.backgrounds.orange;
+        }, color(255, 85, 0), color(226, 255, 82),5);
+    },
+    //}
+    
+    display: function () {
+        if (system.cursors.current) {
+            system.cursors.current = system.cursors.default;
+        }
+        
+        //scene {
+        if (system.scene === undefined) 
+        {system.scene = system.start;}
+        this.scene();
+        //}
+        
+        //cursor {
+        cursor('none');
+            if (system.cursors.current === undefined) {
+                system.cursors.current = system.cursors.default;
+            }
+            system.cursors.current();
+        //}
+        
+        system.time++;
+    },
+};
+var s = system;
+
+user = {
+    name: 'Guest',
+    pref: {
+        doc_pos: 'left',
+        doc_width: 50,
+        
+        background: function () {
+            background(20,25,20);
+        },
+        
+        scheme: {
+            color: color(240),
+            bg: color(50),
+            input: {
+                stroke: color(186),
+                bg: color(50),
+                color: color(240),
+                check: color(55),
+            },
+            
+            button: {
+                bg: color(33,0,77),
+                color: color(189, 0, 0),
+            },
+        },
+    },
+    
+    setup: function () {
+        user.pref.background = pref.backgrounds.purple;
+        user.pref.scheme = pref.schemes.dark;
+        
+    },
+};
+
+pref = {
+    g: createGraphics(width,height,P2D),
+    backgrounds: {
+        green: function () {
+            pref.g.noStroke();
+            pref.g.fill(40, 200, 40);
+            
+            pref.g.background(20,25,20,10);
+
+  // make a x and y grid of ellipses
+  for (var x = 0; x <= width; x = x + 50) {
+    for (var y = 0; y <= height; y = y + 50) {
+      // starting point of each circle depends on mouse position
+      var xAngle = map(mouseX, 0, width, -4 * PI, 4 * PI);
+      var yAngle = map(mouseY, 0, height, -4 * PI, 4 * PI);
+      // and also varies based on the particle's location
+      var angle = xAngle * (x / width) + yAngle * (y / height);
+
+      // each particle moves in a circle
+      var myX = x + 20 * cos(2 * PI * frameCount/2 + angle);
+      var myY = y + 20 * sin(2 * PI * frameCount/5 + angle);
+
+      pref.g.ellipse(myX, myY, 10, 10); // draw particle
+    }
+  }
+
+    image(pref.g,0,0);
+        },
+        purple: function () {
+            background(35,0,77);
+            
+            pushMatrix();
+            fill(255);
+            noStroke();
+            scale(8);
+            this.x = 37;
+            this.y = 22;
+            this.s = 4;
+            var fps = 2.5;
+            ellipse(this.x+(20*cos(frameCount/fps*2)),this.y+(20*cos(frameCount/fps*5)),this.s,this.s);
+            ellipse(this.x+(10*cos(frameCount/fps)),this.y+(-20*cos(frameCount/fps*7)),this.s,this.s);
+            ellipse(this.x+(-10*cos(frameCount/fps*10)),this.y+(-20*cos(frameCount/fps*4)),this.s,this.s);
+            
+            fill(0,204,146);
+            beginShape();
+                vertex(this.x-8,this.y-5);
+                vertex(this.x-8,this.y+5);
+                vertex(this.x,this.y+9);
+                vertex(this.x+8,this.y+5);
+                vertex(this.x+8,this.y-5);
+                vertex(this.x,this.y-9);
+            endShape(CLOSE);
+            fill(255);
+            ellipse(this.x,this.y+-2,4,4);
+            pushMatrix();
+                translate(this.x+-3,this.y+3);
+                rotate(120);
+                ellipse(0,0,4,6);
+            popMatrix();
+            pushMatrix();
+                translate(this.x+3,this.y+3);
+                rotate(-120);
+                ellipse(0,0,4,6);
+            popMatrix();
+            
+            fill(255);
+            ellipse(this.x+(-10*cos(frameCount/fps)),this.y+(20*cos(frameCount/fps*4)),this.s,this.s);
+            ellipse(this.x+(-10*cos(frameCount/fps*7)),this.y+(-20*cos(frameCount/fps)),this.s,this.s);
+            ellipse(this.x+(-10*cos(frameCount/fps*5)),this.y+(20*cos(frameCount/fps*4)),this.s,this.s);
+            
+            popMatrix();
+        },
+        orange: function () {
+            background(255, 85, 0);
+        },
+    },
+    
+    schemes: {
+        dark: {
+            color: color(240),
+            bg: color(50),
+            input: {
+                stroke: color(186),
+                bg: color(50),
+                color: color(240),
+                check: color(0, 0, 0),
+            },
+            
+            button: {
+                bg: color(33,0,77),
+                color: color(189, 0, 0),
+            },
+        },
+        
+        light: {
+            color: color(20, 20, 20),
+            bg: color(255),
+            input: {
+                stroke: color(20),
+                bg: color(150),
+                color: color(20),
+                check: color(0, 34, 186),
+            },
+            
+            button: {
+                bg: color(227, 227, 227),
+                color: color(71, 0, 0),
+            },
+        },
+    },
+};
+
+var duckHunterApp = 4;
+apps = [
+    {
+        name: 'User Home',
+        icon: function () {
+            fill(20, 20, 20);
+            textFont(system.fonts.emoji,35);
+            text('🏠',25,25);
+        },
+        setup: function () {
+            system.scene = system.dashboard;
+        },
+        display: function () {apps[0].open = false;},
+    },// Dashboard
+    {
+        name: 'Settings',
+        icon: function () {
+            fill(20, 20, 20);
+            textFont(system.fonts.emoji,35);
+            text('⚙',25,25);
+        },
+        setup: function () {
+            system.scene = system.settings;
+        },
+        display: function () {apps[0].open = false;},
+    },// Settings
+    {
+        name: 'Calculator',
+        icon: function() {
+            fill(64, 64, 64);
+            rect(13,0,25,35,3);
+            fill(20, 20, 20);
+            rect(17,4,18,7);
+            for (var i = 0 ; i < 4; i++) {
+                for (var j = 0 ; j < 4; j++) {
+                    fill(222, 222, 222);
+                    ellipse(18+i*5,15+j*5,4,4);
+                }
+            }
+        },
+        setup: function() {
+            smooth(); // IDK what it does but I have seen it on other programs so I put it XD
+
+// Button function [
+var opacity = 0;
+var Button = function (x, y, text, toPage, w, h) {
+this.x = x;
+this.y = y;
+this.text = text;
+this.toPage = toPage;
+this.w = w;
+this.h = h;
+};
+Button.prototype.display = function () {
+fill(255, 255, 255);
+ellipse(this.x, this.y, this.w, this.h);
+textAlign(CENTER, CENTER);
+textSize(20);
+pushMatrix();
+fill(255, 0, 0);
+text(this.text, this.x, this.y);
+popMatrix();
+resetMatrix();
+this.clicked();
+};
+Button.prototype.hover = function () {
+if (dist(mouseX, mouseY, this.x, this.y) <= this.w / 2) {
+fill(87, 74, 56);
+ellipse(this.x, this.y, this.w, this.h);
+fill(255);
+text(this.text, this.x, this.y);
+cursor(HAND);
+}
+};
+Button.prototype.clicked = function () {
+if (dist(mouseX, mouseY, this.x, this.y) <= this.w / 2) {
+this.clicking = true;
+} else {
+this.clicking = false;
+}
+};
+
+var Up = new Button(74, 309, "+", 2, 20, 20);
+
+var Down = new Button(74, 345, "-", 2, 20, 20);
+// ]
+
+
+
+var value1 = 0;
+var value2 = 0;
+var decimal1;
+var decimal2;
+
+var sign = ' ';
+var outputs = [];
+var Button_Size = width/11;
+// Buttons [
+var zero = new Button(width/2.5, height/1.14, "0", 2, Button_Size, Button_Size);
+var one = new Button(width/5, height/2.4, "1", 2, Button_Size, Button_Size);
+var two = new Button(width/2.5, height/2.4, "2", 2, Button_Size, Button_Size);
+var three = new Button(width/1.7, height/2.4, "3", 2, Button_Size, Button_Size);
+var four = new Button(width/5, height/1.75, "4", 2, Button_Size, Button_Size);
+var five = new Button(width/2.5, height/1.75, "5", 2, Button_Size, Button_Size);
+var six = new Button(width/1.7, height/1.75, "6", 2, Button_Size, Button_Size);
+var seven = new Button(width/5, height/1.38, "7", 2, Button_Size, Button_Size);
+var eight = new Button(width/2.5, height/1.38, "8", 2, Button_Size, Button_Size);
+var nine = new Button(width/1.7, height/1.38, "9", 2, Button_Size, Button_Size);
+var decimal = new Button(width/1.7, height/1.14, ".", 2, Button_Size, Button_Size);
+var minus = new Button(width/1.3, height/1.14, "-", 2, Button_Size, Button_Size);
+var plus = new Button(width/1.3, height/1.38, "+", 2, Button_Size, Button_Size);
+var multiply = new Button(width/1.3, height/2.4, "x", 2, Button_Size, Button_Size);
+var divide = new Button(width/1.3, height/1.75, "/", 2,Button_Size, Button_Size);
+var enter = new Button(width/5, height/1.14, "=", 2, Button_Size, Button_Size);
+var c = new Button(width/1.3-Button_Size/6.6, height/3.9, "c", 2, Button_Size, Button_Size);
+// ]
+
+function _10(v) {
+    if (v === 1) {
+        value1 *= 10;
+    } else {
+        value2 *= 10;
+    }
+}
+
+function zeroclicked() {
+   if (value1 < 1) {
+        value1 = 0;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 0;
+    } else if (sign !== ' ') {
+        _10(2);
+    } else {
+        _10(1);
+    }
+}
+function oneclicked() {
+    if (value1 < 1) {
+        value1 = 1;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 1;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=1;
+    } else {
+        _10(1);
+        value1+=1;
+    }
+}
+function twoclicked() {
+    if (value1 < 1) {
+        value1 = 2;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 2;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=2;
+    } else {
+        _10(1);
+        value1+=2;
+    }
+}
+function threeclicked() {
+    if (value1 < 1) {
+        value1 = 3;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 3;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=3;
+    } else {
+        _10(1);
+        value1+=3;
+    }
+}
+function fourclicked() {
+    if (value1 < 1) {
+        value1 = 4;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 4;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=4;
+    } else {
+        _10(1);
+        value1+=4;
+    }
+}
+function fiveclicked() {
+    if (value1 < 1) {
+        value1 = 5;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 5;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=5;
+    } else {
+        _10(1);
+        value1+=5;
+    }
+}
+function sixclicked() {
+    if (value1 < 1) {
+        value1 = 6;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 6;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=6;
+    } else {
+        _10(1);
+        value1+=6;
+    }
+}
+function sevenclicked() {
+    if (value1 < 1) {
+        value1 = 7;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 7;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=7;
+    } else {
+        _10(1);
+        value1+=7;
+    }
+}
+function eightclicked() {
+    if (value1 < 1) {
+        value1 = 8;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 8;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=8;
+    } else {
+        _10(1);
+        value1+=8;
+    }
+}
+function nineclicked() {
+    if (value1 < 1) {
+        value1 = 9;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 9;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=9;
+    } else {
+        _10(1);
+        value1+=9;
+    }
+}
+
+function decimalclicked() {
+    if (sign !== ' ') {
+        decimal1 = true;
+    } else {
+        decimal2 = true;
+    }
+}
+
+function plusclicked() {
+    sign = '+';
+}
+function minusclicked() {
+    sign = '-';
+}
+function multiplyclicked() {
+    sign = '*';
+}
+function divideclicked() {
+    sign = '/';
+}
+
+function enterclicked() {
+    var math = value1+sign+value2;
+    var value;
+    switch (sign) {
+        case '*':
+            value = value1*value2;
+            break;
+        case '/':
+            value = value1/value2;
+            break;
+        case '+':
+            value = value1+value2;
+            break;
+        case '-':
+            value = value1-value2;
+            break;
+    }
+    outputs.push(math+' = '+value);
+    value1 = value;
+    value2 = 0;
+    sign = ' ';
+}
+
+function cclicked() {
+    value1 = 0;
+    value2 = 0;
+    sign = ' ';
+}
+
+this.display = function() {
+    background(69, 107, 140);
+    strokeWeight(0.5);
+    fill(117, 117, 117);
+    rect(width/7.2,height/5.5,width/1.43,height/7);
+    zero.display();
+    one.display();
+    two.display();
+    three.display();
+    four.display();
+    five.display();
+    six.display();
+    seven.display();
+    eight.display();
+    nine.display();
+    decimal.display();
+    plus.display();
+    minus.display();
+    multiply.display();
+    divide.display();
+    enter.display();
+    c.display();
+    text(value1+sign+value2,width/2.3,height/4);
+    for (var i = 0 ; i < outputs.length; i++) {
+        text(outputs[i],width/2,15+i*20);
+        if (15+i*20 > height/5.5) {
+            outputs.splice(0,1);
+        }
+    }
+    if (clicking) {
+        if (zero.clicking) {
+            zeroclicked();
+        } else if (one.clicking) {
+            oneclicked();
+        } else if (two.clicking) {
+            twoclicked();
+        } else if (three.clicking) {
+            threeclicked();
+        } else if (four.clicking) {
+            fourclicked();
+        } else if (five.clicking) {
+            fiveclicked();
+        } else if (six.clicking) {
+            sixclicked();
+        } else if (seven.clicking) {
+            sevenclicked();
+        } else if (eight.clicking) {
+            eightclicked();
+        } else if (nine.clicking) {
+            nineclicked();
+        } else if (decimal.clicking) {
+            decimalclicked();
+        } else if (plus.clicking) {
+            plusclicked();
+        } else if (minus.clicking) {
+            minusclicked();
+        } else if (multiply.clicking) {
+            multiplyclicked();
+        } else if (divide.clicking) {
+            divideclicked();
+        } else if (enter.clicking) {
+            enterclicked();
+        }else if (c.clicking) {
+            cclicked();
+        }
+    }
+    
+    // X button
+    fill(173, 0, 0);
+    rect(width-25,5,20,20,3);
+    fill(255, 43, 43);
+    text('X',width-15,15);
+    if (mouseX > width-25 && mouseY < 25 && clicking) {
+        this.open = false;
+    }
+    // – button
+    fill(3, 171, 0);
+    rect(width-50,5,20,20,3);
+    fill(43, 255, 75);
+    text('–',width-40,15);
+    if (mouseX > width-50 && mouseX < width-30 && mouseY < 25 && clicking) {
+        this.open = false;
+        this.minimized = true;
+    }
+};
+
+        },
+    },// Calculator
+    {
+        name: 'Fish Tank',
+        icon: function() {
+            image(s.img.fish,0,0,50,50);
+        },
+        setup: function() {
+            // setup {    
+    function sandHill (x,y,w,h) {
+        beginShape();
+        vertex(x, y+h);
+        bezierVertex(x+w/4,y,x+w/2,y+h/4,x+w,y+h);
+        endShape();
+    }
+    
+    function Bubble (x,y,size,speed) {
+        noStroke();
+        fill(0, 200, 255);
+        
+        if (speed === undefined) {
+            speed = 4;
+        }
+        
+        return {
+            x: x,
+            y: y,
+            size:size,
+            speed: speed,
+            draw: function () {
+                noStroke();
+                this.x += random(1,2) * cos(frameCount*random(1,2));
+                this.y -= this.speed;
+                fill(0,200,200);
+                ellipse(this.x,this.y,this.size,this.size);
+                fill(255);
+                ellipse(this.x-this.size/4,this.y-this.size/4,this.size/4,this.size/4);
+                if (this.y < -this.size) {
+                    this.y = height+this.size;
+                    this.x = random(width);
+                }
+            }
+        };
+    }
+    
+    function Fish (x,y, width,height, color) {
+        return {
+            x: x,
+            y: y,
+            
+            width: width,
+            height:height,
+            
+            directionX: 2,
+            directionY: 0,
+            
+            color: color,
+            
+            draw: function (speed) {
+                fill(this.color);
+                ellipse(this.x, this.y, this.width*0.75, this.height*0.9);
+                this.x += 1 * cos(frameCount*5);
+                this.directionX += round(random(1,-1));
+                this.directionY += round(random(1,-1));
+                
+                if (this.directionY <= 0) {
+                    this.y += -noise(random(-200,200));
+                }
+                if (this.directionY >= 1) {
+                    this.y += noise(random(-200,200));
+                }
+                
+                if (this.x < -this.width) {
+                    this.x = 600+this.width;
+                }
+                if (this.x > 600+this.width) {
+                    this.x = -this.width;
+                }
+                if (this.y < -this.height) {
+                    this.y = 400+this.height;
+                }
+                if (this.y > 400+this.height) {
+                    this.y = 0-this.height;
+                }
+                
+                if (this.directionX >= 2) {
+                    this.x += speed;
+                    triangle(this.x-this.width*0.75/2, this.y, this.x-this.width*0.70, this.y-this.height/2, this.x-this.width*0.70, this.y+this.height/2);
+                }
+                if (this.directionX <= 0) {
+                    this.x -= speed;
+                    triangle(this.x+this.width*0.75/2, this.y, this.x+this.width*0.70, this.y-this.height/2, this.x+this.width*0.70, this.y+this.height/2);
+                }
+            }
+        };
+    }
+    
+    var fish = [];
+    
+    function Button (x,y,width,height,callback) {
+        rect(x,y,width,height);
+        if (mouseIsPressed && mouseX > x && mouseY > y && mouseX < x + width && mouseY < y + height) {
+            callback();
+        }
+    }
+    
+    var Size = {x:40,y:27}, fishColor = color(91, 0, 194);
+    
+    var bubbles = [];
+    
+    for (var i = 0 ; i < 30 ; i++) {
+        bubbles.push(Bubble(random(width),random(height),random(5,30),random(2,10)));
+    }
+    //}
+            textFont(system.fonts.sans_serif);
+            this.display =  function() {
+            background(89, 216, 255);
+        textSize(12);
+        
+        fill(255, 216, 166);
+        sandHill(43,290,234,112);
+        
+        //buttons
+        {
+        // i tryed to use a loop it did not work
+        fill(194, 0, 16);
+        Button(10,10,37,25,function () {fishColor = color(194, 0, 16);});
+        fill(230, 119, 0);
+        Button(56,10,37,25,function () {fishColor = color(230, 119, 0);});
+        fill(233, 250, 0);
+        Button(101,10,37,25,function () {fishColor = color(233, 250, 0);});
+        fill(0, 194, 45);
+        Button(147,10,37,25,function () {fishColor = color(0, 194, 45);});
+        fill(0, 6, 194);
+        Button(193,10,37,25,function () {fishColor = color(0, 6, 194);});
+        fill(91, 0, 194);
+        Button(239,10,37,25,function () {fishColor = color(91, 0, 194);});
+        
+        fill(0, 94, 245);
+        Button(300,10,15,10,function () {Size.x ++;});
+        fill(255, 0, 0);
+        text("+",304,19);
+        
+        fill(0, 94, 245);
+        Button(300,25,15,10,function () {Size.x --;});
+        fill(255, 0, 0);
+        text("-",306,34);
+        
+        text(Size.x,320,26);
+        
+        fill(0, 94, 245);
+        Button(340,10,15,10,function () {Size.y ++;});
+        fill(255, 0, 0);
+        text("+",344,19);
+        
+        fill(0, 94, 245);
+        Button(340,25,15,10,function () {Size.y --;});
+        fill(255, 0, 0);
+        text("-",346,34);
+        }
+        
+        text(Size.y,360,26);
+        
+        for (var i = 0 ; i < fish.length ; i++) {
+            fish[i].draw(fish[i].width/fish[i].height);
+        }
+        
+        for (var i = 0 ; i < bubbles.length ; i++) {
+            bubbles[i].draw();
+        }
+        
+        if (frameCount < 100) {
+                textSize(40);
+                fill(237, 119, 0);
+                text("Click to create fish",20,80);
+        }
+        if (mouseY > 50 && clicking) {
+            fish.push(Fish(mouseX,mouseY,Size.x,Size.y,fishColor));
+        }
+        
+        textSize(20);
+        fill(242, 43, 12);
+        text('x',width-10,10);
+        if (mouseX > width-20 && mouseY < 20 && clicking) {
+            this.open = false;
+        }
+        fill(5, 107, 0);
+        text('–',width-30,10);
+        if (mouseX > width-40 && mouseX < width-20 && mouseY < 20 && clicking) {
+            this.open = false;
+            this.minimized = true;
+        }
+        };
+        }
+    },// Fish tank
+    {
+        name: 'Duck Hunter',
+        icon: function() {},
+        setup: function() {
+           
+var buttons = function () {
+apps[duckHunterApp].display = function() {
+     
+
+if (mouseX>=150&&mouseX<=250&&mouseY<=222&&mouseY>=182){
+    cursor(HAND);
+    textAlign(CENTER);
+    stroke(255, 234, 0);
+    fill(112, 67, 0);
+    rect(150, 182, 100, 40, 10);
+    textSize(30);
+    fill(255, 234, 0);
+    text("H U N T", 200, 211);
+    stroke(255, 234, 0);
+
+}
+else{
+    cursor(ARROW);
+    stroke(112, 67, 0);
+    fill(255, 234, 0);
+    rect(150, 182, 100, 40, 10);
+    textSize(30);
+    fill(112, 67, 0);
+    text("H U N T", 200, 211);
+    stroke(112, 67, 0);
+}
+if (mouseX>=150&&mouseX<=250&&mouseY<=300&&mouseY>=260){
+    cursor(HAND);
+    stroke(255, 234, 0);
+    fill(112, 67, 0);
+    rect(150, 260, 100, 40, 10);
+    textSize(30);
+    fill(255, 234, 0);
+    text("H O W", 200, 289);
+    stroke(255, 234, 0);
+
+}
+else{
+    stroke(112, 67, 0);
+    fill(255, 234, 0);
+    rect(150, 260, 100, 40, 10);
+    textSize(30);
+    fill(112, 67, 0);
+    text("H O W", 200, 289);
+    stroke(112, 67, 0);
+}
+};
+};
+var home = function () {
+    textAlign(CENTER);
+    background(170, 226, 240);
+    textFont(createFont("playbill"));
+    cursor("arrow");
+    noStroke();
+    fill(54, 176, 48);
+    rect(0, 160, 400, 240);
+    beginShape();
+    curveVertex(-1,  74-40);
+    curveVertex(401,  201-40);
+    curveVertex(197,  179-40);
+    curveVertex(98,  197-40);
+    curveVertex(-9, 200-40);
+    curveVertex(106, 284-40);
+    endShape();
+    fill(112, 67, 0);
+    textSize(90);
+    text("Duck Hunter", 200, 102);
+    buttons();
+    var game = function () {
+var duck = function (x, y, s) {
+pushMatrix();
+translate(x, y);
+scale(s);
+var pixelSize = 5;
+var pixels = [
+
+"-----------------ggggg-------------------------------------------------------------------",
+"---------------gggggggg------------------------------------------------------------------",
+"--------------gggggggggg-----------------------------------------------------------------",
+"-------------gggggggggggg----------------------------------------------------------------",
+"------------ggggggggggggg----------------------------------------------------------------",
+"-----------ygggggggggggggg---------------------------------------------------------------",
+"--yyyyyyyyyyggggbggggggggg---------------------------------------------------------------",
+"--yyyyyyyyyygggggggggggggg---------------------------------------------------------------",
+"----yyyyyyyyygggggggggggggg--------------------------------------------------------------",
+"-----yyyyyyyygggggggggggggg---------------------r----------------------------------------",
+"-------yyyyyygggggggggggggg---------------------r----------------------------------------",
+"-------------gggggggggggggg---------------------rr---------------------------------------",
+"--------------ggggggggggggg---------------------rr---------------------------------------",
+"---------------gggggggwwwwww-------------------rrr---------------------------------------",
+"---------------gggwwwwwwwwwww-----------------rrrrr--------------------------------------",
+"----------------wwwwwwwrrrrrrrr-------------rrrrrrr--------------------------------------",
+"-----------------wwrrrrrrrrrrrrrr-------rrrrrrrrrrr--------------------------------------",
+"-----------------rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr--------------------------------------",
+"------------------rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr---------------------------------------",
+"-------------------rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr---------------------------------------",
+"--------------------rrrrrrrrrrrrrrrrrrrrrrrrrrrrrr---------------------------------------",
+"---------------------rrrrrrrrrrrrrrrrrrrrrrrrrrrr----------------------------------------",
+"---------------------rrrrrrrrrrrrrrrrrrrrrrrrrrrr----------------------------------------",
+"----------------------rrrrrrrrrrrrrrrrrrrrrrrrrrr----------------------------------------",
+"----------------------rrrrrrrrrrrrrrrrrrrrrrrrrr-----------------------------------------",
+"-----------------------rrrrrrrrrrrrrrrrrrrrrrrrr-----------------------------------------",
+"------------------------rrrrrrrrrrrrrrrrrrrrrr-------------------------------------------",
+"-------------------------rrrrrrrrrrrrrrrrrrr---------------------------------------------",
+"--------------------------rrrrrrrrrrrrrrrr-----------------------------------------------",
+"---------------------------rrrrrrrrrrrrr-------------------------------------------------",
+"-----------------------------rrrrrrrr----------------------------------------------------",
+"-------------------------------rr-rrr----------------------------------------------------",
+"-------------------------------yr--r-----------------------------------------------------",
+"------------------------------y----y-----------------------------------------------------",
+"-----------------------------y-----y-----------------------------------------------------",
+"----------------------------y------y-----------------------------------------------------",
+"-----------------------------y----y------------------------------------------------------",
+"------------------------------y-y--y-----------------------------------------------------",
+"------------------------------yy---y-----------------------------------------------------",
+"------------------------------y----y-----------------------------------------------------",
+"-----------------------------y--yyyyy----------------------------------------------------",
+"-----------------------------------------------------------------------------------------",
+
+
+
+    
+];
+var Image = function(x,y){
+    this.x = x;
+    this.y = y;
+};
+Image.prototype.draw = function() {
+
+    pushMatrix();
+    translate(this.x,this.y);
+    noStroke();
+    
+    
+    for (var y = 0; y < pixels.length; y++){
+        for (var x = 0; x < pixels[y].length; x++){
+            
+            switch(pixels[y][x]){
+                
+                case '-':
+                    noFill();
+                    noStroke();
+                    rect(x * pixelSize + 40, y * pixelSize + -60, pixelSize, pixelSize);
+                break;
+                
+                
+                case 'b':
+                    fill(20, 20, 20);
+                    stroke(20, 20, 20);
+                    rect(x * pixelSize + 40, y * pixelSize + -60, pixelSize, pixelSize);
+                break;
+                
+                
+                case 'w':
+                    fill(255, 255, 255);
+                    stroke(255, 255, 255);
+                    rect(x * pixelSize + 40, y * pixelSize + -60, pixelSize, pixelSize);
+                break;
+                
+                
+                case 'y':
+                    fill(242, 232, 46);
+                    stroke(242, 232, 46);
+                    rect(x * pixelSize + 40, y * pixelSize + -60, pixelSize, pixelSize);
+                break;
+                
+                
+                case 'r':
+                    fill(87, 42, 4);
+                    stroke(87, 42, 4);
+                    rect(x * pixelSize + 40, y * pixelSize + -60, pixelSize, pixelSize);
+                break;
+                case 'g':
+                    fill(36, 130, 17);
+                    stroke(36, 130, 17);
+                    rect(x * pixelSize + 40, y * pixelSize + -60, pixelSize, pixelSize);
+                break;
+                
+            }}}
+            popMatrix();
+};
+var imge = new Image(0, 0);
+imge.draw();
+popMatrix();
+};
+var sz = 120;
+var x2 = random(10, 350);
+var y2 = random(180, 370);
+var score = 0;
+var sC = color(255, 234, 0);
+var time = 30;
+var duckShot = 0;
+if (clicking) {
+    playSound(getSound("rpg/step-heavy"));
+    if (mouseX>=x2+10&&mouseY>=y2-10&&mouseX<=x2+90&&mouseY<=y2+70) {
+    x2 = random(10, 350);
+    y2 = random(180, 370);
+    score += random(8, 12);
+    duckShot ++;
+    apps[duckHunterApp].display = function() { 
+        time -= 0.08;
+        var t = round(time);
+        var s = round(score);
+        background(170, 226, 240);
+cursor("none");
+noStroke();
+fill(54, 176, 48);
+rect(0, 160, 400, 240);
+beginShape();
+curveVertex(-1,  74-40);
+curveVertex(401,  201-40);
+curveVertex(197,  179-40);
+curveVertex(98,  197-40);
+curveVertex(-9, 200-40);
+curveVertex(106, 284-40);
+endShape();
+duck(x2, y2, 0.2);
+        fill(0, 0, 0);
+        rect(mouseX + 100, mouseY + 100, 300, 300, -sz, 0, 0, 0);
+rect(mouseX - 400, mouseY + 100, 300, 300, 0, -sz, 0, 0);
+rect(mouseX + 100, mouseY - 400, 300, 300, 0, 0, -0.1, -sz);
+rect(mouseX - 400, mouseY - 400, 300, 300, 0, 0, -sz, 0);
+rect(mouseX - 100, mouseY - 400, 200, 300);
+rect(mouseX - 400, mouseY - 100, 300, 200);
+rect(mouseX - 100, mouseY + 100, 200, 300);
+rect(mouseX + 100, mouseY - 100, 300, 200);
+stroke(0, 0, 0);
+strokeWeight(2);
+line(mouseX, mouseY-100, mouseX, mouseY+98);
+line(mouseX-100, mouseY, mouseX+98, mouseY);
+for (var c = mouseX-100; c < mouseX+98; c += 10) {
+    line(c, mouseY-3, c, mouseY+3);
+}
+for (var l = mouseY-100; l < mouseY+98; l += 10) {
+    line(mouseX-3, l, mouseX+3, l);
+}
+textSize(30);
+fill(sC);
+textAlign(CENTER, CENTER);
+text("Score:" + s, 50, 30);
+text("Ducks Shot:" + duckShot, 145, 30);
+textAlign("NONE", "NONE");
+text("Time:" + t, 220, 40);
+noStroke();
+if (time <= 0) {
+        apps[duckHunterApp].display = function() {
+        textAlign(CENTER, CENTER);
+        cursor(ARROW);
+        strokeWeight(1);
+        background(170, 226, 240);
+        noStroke();
+        fill(54, 176, 48);
+        rect(0, 160, 400, 240);
+        beginShape();
+        curveVertex(-1,  74-40);
+        curveVertex(401,  201-40);
+        curveVertex(197,  179-40);
+        curveVertex(98,  197-40);
+        curveVertex(-9, 200-40);
+        curveVertex(106, 284-40);
+        endShape();
+        fill(112, 67, 0);
+        textSize(50);
+        text("Great job!\n\n You got a score of " + s + "!\n And you shot " + duckShot + " ducks!\n That's some good eatin'!", 16, -20, 380, 390);
+        stroke(112, 67, 0);
+        fill(255, 234, 0);
+        rect(10, 10, 54, 38, 10);
+        textSize(22);
+        fill(112, 67, 0);
+        text("B A C K", 37, 30);
+        mouseClicked = function () {
+            if(mouseX>=10&&mouseX<=64&&mouseY<=48&&mouseY>=10) {
+                home();
+            }
+        };
+        };
+    }
+    };
+    }
+    else {time-=2;}
+}
+apps[duckHunterApp].display = function() {
+time -= 0.08;
+var t = round(time);
+var s = round(score);
+background(170, 226, 240);
+cursor("none");
+noStroke();
+fill(54, 176, 48);
+rect(0, 160, 400, 240);
+beginShape();
+curveVertex(-1,  74-40);
+curveVertex(401,  201-40);
+curveVertex(197,  179-40);
+curveVertex(98,  197-40);
+curveVertex(-9, 200-40);
+curveVertex(106, 284-40);
+endShape();
+duck(x2, y2, 0.2);
+fill(0, 0, 0);
+rect(mouseX + 100, mouseY + 100, 300, 300, -sz, 0, 0, 0);
+rect(mouseX - 400, mouseY + 100, 300, 300, 0, -sz, 0, 0);
+rect(mouseX + 100, mouseY - 400, 300, 300, 0, 0, -0.1, -sz);
+rect(mouseX - 400, mouseY - 400, 300, 300, 0, 0, -sz, 0);
+rect(mouseX - 100, mouseY - 400, 200, 300);
+rect(mouseX - 400, mouseY - 100, 300, 200);
+rect(mouseX - 100, mouseY + 100, 200, 300);
+rect(mouseX + 100, mouseY - 100, 300, 200);
+stroke(0, 0, 0);
+strokeWeight(2);
+line(mouseX, mouseY-100, mouseX, mouseY+98);
+line(mouseX-100, mouseY, mouseX+98, mouseY);
+for (var c = mouseX-100; c < mouseX+98; c += 10) {
+    line(c, mouseY-3, c, mouseY+3);
+}
+for (var l = mouseY-100; l < mouseY+98; l += 10) {
+    line(mouseX-3, l, mouseX+3, l);
+}
+textSize(30); 
+fill(sC);
+textAlign(CENTER, CENTER);
+text("Score:" + s, 50, 30);
+text("Ducks Shot:" + duckShot, 145, 30);
+textAlign("NONE", "NONE");
+text("Time:" + t, 220, 40);
+noStroke();
+if (time <= 0) {
+        apps[duckHunterApp].display = function() {
+        textAlign(CENTER, CENTER);
+        cursor(ARROW);
+        strokeWeight(1);
+        background(170, 226, 240);
+        noStroke();
+        fill(54, 176, 48);
+        rect(0, 160, 400, 240);
+        beginShape();
+        curveVertex(-1,  74-40);
+        curveVertex(401,  201-40);
+        curveVertex(197,  179-40);
+        curveVertex(98,  197-40);
+        curveVertex(-9, 200-40);
+        curveVertex(106, 284-40);
+        endShape();
+        fill(112, 67, 0);
+        textSize(50);
+        text("Great job!\n\n You got a score of " + s + "!\nAnd you shot " + duckShot + " ducks!\nThat's some good eatin'!", 16, -20, 380, 390);
+        stroke(112, 67, 0);
+        fill(255, 234, 0);
+        rect(10, 10, 54, 38, 10);
+        textSize(22);
+        fill(112, 67, 0);
+        text("B A C K", 37, 30);
+        mouseClicked = function () {
+            if(mouseX>=10&&mouseX<=64&&mouseY<=48&&mouseY>=10) {
+                home();
+            }
+        };
+        };
+    }
+};
+    
+};
+    var howScreen = function () {
+    cursor(ARROW);
+    apps[duckHunterApp].display = function() {
+    textAlign(CENTER, CENTER);
+    background(170, 226, 240);
+    textFont(createFont("playbill"));
+    cursor("arrow");
+    noStroke();
+    fill(54, 176, 48);
+    rect(0, 160, 400, 240);
+    beginShape();
+    curveVertex(-1,  74-40);
+    curveVertex(401,  201-40);
+    curveVertex(197,  179-40);
+    curveVertex(98,  197-40);
+    curveVertex(-9, 200-40);
+    curveVertex(106, 284-40);
+    endShape();
+    fill(112, 67, 0);
+    textSize(42);
+    text("Use the mouse to control\nthe scope, shoot as many\nducks as you can before\n the time runs out.\nClick the mouse to shoot, but\nbe careful 'cause if you\nmiss you subtract two seconds\nfrom the clock.", 200, 200);
+    stroke(112, 67, 0);
+    fill(255, 234, 0);
+    rect(10, 10, 54, 38, 10);
+    textSize(22);
+    fill(112, 67, 0);
+    text("B A C K", 37, 30);
+    if (clicking) {
+        if(mouseX>=10&&mouseX<=64&&mouseY<=48&&mouseY>=10) {
+            home();
+        }
+    }
+    };
+};
+    if (clicking) {
+    if (mouseX>=150&&mouseX<=250&&mouseY<=300&&mouseY>=260) {
+        howScreen();
+    }
+    if(mouseX>=150&&mouseX<=250&&mouseY<=222&&mouseY>=182) {
+            game();
+    }
+    }
+};
+home();
+        }
+        
+    }, // duck hunter
+];
+
+function setupUser(u) {
+    switch (u) {
+        case 0:
+            user.pref.doc_width = 60;
+            user.name = 'dev';
+            break;
+        case 1:
+            user.name = 'dev2';
+            user.pref.background = function() {
+                
+                background(255, 255, 255);
+                image(s.img.trex[floor(frameCount%60/20)],width/2-200,0);
+            };
+            break;
+    }
+}
+
+system.img.trex[0] = toImg(function () {
+    /**
+     * this code was written by: awsomeman21
+    **/
+    
+// https://www.khanacademy.org/computer-programming/pixel-art-tutorial-read-code/6359920164290560 for the tutorial tysm =D.
+// Please sub to me if you want to see more things like this =D : https://www.khanacademy.org/computer-programming/awesome-man-21s-sub-page/5793917568499712
+
+var Rex = [
+    
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "---------------------aaaaaaaaaa----------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abb-bbbbbbba---------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abbbbb---------------------------",
+     "---------a----------abbbbbbbba-----------------------",
+     "--------aba--------abbbbba---------------------------",
+     "--------aba-------abbbbbba---------------------------",
+     "--------abba------abbbbbbaaaa------------------------",
+     "--------abbba----abbbbbbbbbbba-----------------------",
+     "--------abbbbbbbbbbbbbbbbbaaba-----------------------",
+     "--------abbbbbbbbbbbbbbbbba-a------------------------",
+     "---------abbbbbbbbbbbbbbba---------------------------",
+     "----------abbbbbbbbbbbbba----------------------------",
+     "-----------abbbbbbbbbbba-----------------------------",
+     "------------abbbbbbbbba------------------------------",
+     "-------------abbbbbbba-------------------------------",
+     "-------------abbbabba--------------------------------",
+     "-------------abba-aba--------------------------------",
+     "-------------abba-aba--------------------------------",
+     "-------------abba-abba-------------------------------",
+     "--------------aa---aa--------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+];
+var rex = {
+    "-": function() {
+    noFill(); 
+    },
+    "a": function() {
+    fill(0, 0, 0);
+    },
+    "b": function() {
+    fill(194, 10, 255);
+    },
+};
+for (var y = 0; y < Rex.length; y++) {
+        for (var x = 0; x < Rex[y].length; x++) {
+            var type = Rex[y][x];
+            noStroke();
+            rex[type]();
+            rect(x*7, y*7, 7, 7);
+        }
+    }
+
+},0,0,width,height);
+system.img.trex[1] = toImg(function () {
+    /**
+     * this code is by: awsomeman21
+    **/
+    // https://www.khanacademy.org/computer-programming/pixel-art-tutorial-read-code/6359920164290560 for the tutorial tysm =D.
+// Please sub to me if you want to see more things like this =D : https://www.khanacademy.org/computer-programming/awesome-man-21s-sub-page/5793917568499712
+
+background(255, 255, 255);
+var Rex = [
+    
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "---------------------aaaaaaaaaa------------d----------",
+     "--------------------abbbbbbbbbba----------d-d--------",
+     "--------------------abbbbbbbbbba---------d-----------",
+     "--------------------abb-bbbbbbba-----aaaadaaaa-----------",
+     "--------------------abbbbbbbbbba-----acccaccca-------",
+     "--------------------abbbbbbbbbba-----accccccca--------",
+     "--------------------abbbbbbbbbba------aaaaaaa--------",
+     "--------------------abbbbb---------------------------",
+     "---------a----------abbbbbbbba-----------------------",
+     "--------aba--------abbbbba---------------------------",
+     "--------aba-------abbbbbba---------------------------",
+     "--------abba------abbbbbbaaaa------------------------",
+     "--------abbba----abbbbbbbbbbba-----------------------",
+     "--------abbbbbbbbbbbbbbbbbaaba-----------------------",
+     "--------abbbbbbbbbbbbbbbbba-a------------------------",
+     "---------abbbbbbbbbbbbbbba---------------------------",
+     "----------abbbbbbbbbbbbba----------------------------",
+     "-----------abbbbbbbbbbba-----------------------------",
+     "------------abbbbbbbbba------------------------------",
+     "-------------abbbbbbba-------------------------------",
+     "-------------abbbabba-----------------------------------",
+     "-------------abba-aba--------------------------------",
+     "-------------abba-aba--------------------------------",
+     "-------------abba-abba--------------------------------",
+     "--------------aa---aa--------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+];
+var rex = {
+    "-": function() {
+    noFill(); 
+    },
+    "a": function() {
+    fill(0, 0, 0);
+    },
+    "b": function() {
+    fill(194, 10, 255);
+    },
+    "c": function() {
+    fill(255, 68, 0);
+    },
+    "d": function() {
+    fill(59, 255, 10);
+    },
+};
+for (var y = 0; y < Rex.length; y++) {
+        for (var x = 0; x < Rex[y].length; x++) {
+            var type = Rex[y][x];
+            noStroke();
+            rex[type]();
+            rect(x*7, y*7, 7, 7);
+        }
+    }
+},0,0,width,height);
+system.img.trex[2] = toImg(function () {
+        background(20,25,20);
+    /**
+     * this code it by: awsomeman21
+    **/
+    // https://www.khanacademy.org/computer-programming/pixel-art-tutorial-read-code/6359920164290560 for the tutorial tysm =D.
+// Please sub to me if you want to see more things like this =D : https://www.khanacademy.org/computer-programming/awesome-man-21s-sub-page/5793917568499712
+
+background(255, 255, 255);
+var Rex = [
+    
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "----------------------------d-------------------------",
+     "---------------------------d-d-------------------------",
+     "--------------------------d--------------------------",
+     "---------------------aaaaaaaaaa----------------------",
+     "--------------------abbcbbbbbbba---------------------",
+     "--------------------abbbbbbbbcca---------------------",
+     "--------------------abb-bcbbccca---------------------",
+     "--------------------abbbcbbbccca---------------------",
+     "--------------------abbbbcbbccca---------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abbbbb---------------------------",
+     "---------a----------abbbbbbbba-----------------------",
+     "--------aba--------abbbbba---------------------------",
+     "--------aba-------abbbbbba---------------------------",
+     "--------abba------abbbbbbaaaa------------------------",
+     "--------abbba----abbbbbbbbbbba-----------------------",
+     "--------abbbbbbbbbbbbbbbbbaaba-----------------------",
+     "--------abbbbbbbbbbbbbbbbba-a------------------------",
+     "---------abbbbbbbbbbbbbbba---------------------------",
+     "----------abbbbbbbbbbbbba----------------------------",
+     "-----------abbbbbbbbbbba-----------------------------",
+     "------------abbbbbbbbba------------------------------",
+     "-------------abbbbbbba-------------------------------",
+     "-------------abbbabba-----------------------------------",
+     "-------------abba-aba--------------------------------",
+     "-------------abba-aba--------------------------------",
+     "-------------abba-abba--------------------------------",
+     "--------------aa---aa--------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+];
+var rex = {
+    "-": function() {
+    noFill(); 
+    },
+    "a": function() {
+    fill(0, 0, 0);
+    },
+    "b": function() {
+    fill(194, 10, 255);
+    },
+    "c": function() {
+    fill(255, 68, 0);
+    },
+    "d": function() {
+    fill(59, 255, 10);
+    },
+};
+for (var y = 0; y < Rex.length; y++) {
+        for (var x = 0; x < Rex[y].length; x++) {
+            var type = Rex[y][x];
+            noStroke();
+            rex[type]();
+            rect(x*7, y*7, 7, 7);
+        }
+    }},0,0,width,height);
+    
+s.img.fish = toImg(function() {
+    /**
+     * this code is by: Awesome Man 21
+    **/
+    // https://www.khanacademy.org/computer-programming/pixel-art-tutorial-read-code/6359920164290560 for the tutorial tysm =D.
+// Please sub to me if you want to see more things like this =D : https://www.khanacademy.org/computer-programming/awesome-man-21s-sub-page/5793917568499712
+
+background(50);
+var FISH = [
+    
+     "-------------------------------------------",
+     "-------------------------------------------",
+     "-------------------------------------------",
+     "-------------------------------------------",
+     "-------------------------------------------",
+     "-------------------------------------------",
+     "-------------------------------------------",
+     "------------------------------------------",
+     "------------------------------------------",
+     "-----cc-----------------------------------",
+     "-----cc------------------------------------",
+     "-------------------------------------------",
+     "--cc---------------------------------------",
+     "--cc-------------a-------------------------",
+     "----------------ada-------aaaa-------------",
+     "------cc-------adddaa---aaddda------------",
+     "------cc------adddddda-addddaa-------------",
+     "--------------aaaaaaaaaaddda-----------aa-",
+     "---cc----aaaaaccccccccccaada----------acca",
+     "---cc---aeeeaccccccccccccaaa---------acca-",
+     "------aaaeaeaccaccccccccccccaaa------acca--",
+     "-----accaaaaacccaccccccccccccccaa----aca---",
+     "-----accccccccccaccccccccccccccccaaaacca---",
+     "-----accccbcccccaccccccccccccccccccccccca--",
+     "------abbbbccccacccccccccccccccccaaaaaacca-",
+     "-------acccccccccccccccccccccccaaaa----acca-",
+     "--------aaccccccccccccccccccccaa--------acca",
+     "----------aaaccccccccccccccaaa-----------aa-",
+     "-------------aaaaaacccccaaaddda-------------",
+     "--------------addddaaaaa--adddda------------",
+     "--------------addda--------adddda-----------",
+     "---------------adda---------aaaa------------",
+     "----------------ada-------------------------",
+     "-----------------a--------------------------",
+     "--------------------------------------------",
+];
+var fish = {
+    "-": function() {
+    noFill(); 
+    },
+    "a": function() {
+    fill(0, 0, 0);
+    },
+    "b": function() {
+    fill(255, 10, 10);
+    },
+    "c": function() {
+    fill(24, 196, 219);
+    },
+    "d": function() {
+    fill(75, 72, 79);
+    },
+    "e": function() {
+    fill(188, 245, 206);
+    },
+};
+for (var y = 0; y < FISH.length; y++) {
+        for (var x = 0; x < FISH[y].length; x++) {
+            var type = FISH[y][x];
+            noStroke();
+            fish[type]();
+            rect(x*7, y*7, 7, 7);
+        }
+    }
+},0,0,330,330);
+
+user.setup();
+draw = function() {
+    // click && type stuff {
+    if (!mouseIsPressed) {
+        clickTime++;
+        if (clickTime === 1) {
+            clicking = true;
+        } else {clicking = false;}
+    } else {
+        clickTime = 0;
+        clicking = false;
+    }
+    
+    
+    if (mouseIsPressed) {
+        clickTime1++;
+        if (clickTime1 === 1) {
+            clicking1 = true;
+        } else {clicking1 = false;}
+    } else {
+        clickTime1 = 0;
+        clicking1 = false;
+    }
+    
+    if (keyIsPressed) {
+        keyTime++;
+        if (keyTime === 1) {
+            typeing = true;
+        } else {typeing = false;}
+    } else {
+        keyTime = 0;
+    }
+    //}
+    
+    system.display();
+};
+
+keyPressed = function() {
+    keys[keyCode] = true;
+};
+keyReleased = function() {
+    keys[keyCode] = false;
+};

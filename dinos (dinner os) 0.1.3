@@ -1,0 +1,1601 @@
+
+/*
+ program id: 4614563845586944
+ 
+ api stuffs
+ 
+  authorKaid: kaid_129428899791640004323186
+  authorNickname: Shipment22
+  created: 2021-04-09T16:53:45Z
+  flaggedByUser: false
+  key: ag5zfmtoYW4tYWNhZGVteXIXCxIKU2NyYXRjaHBhZBiAgL32vZ2ZCAw
+  spinoffCount: 0
+  sumVotesIncremented: 2
+  thumb: /computer-programming/dinos-dinner-os-013/4614563845586944/5220590492270592.png
+  title: dinos (dinner os) 0.1.3
+  translatedTitle: dinos (dinner os) 0.1.3
+  url: https://www.khanacademy.org/computer-programming/dinos-dinner-os-013/4614563845586944
+*/
+
+
+
+/* * this may or may not be the current version for more info go to: https://www.khanacademy.org/cs/_/5220148804272128
+ * for the current version
+ * 
+ * Have any suggestions, or wan't to help tell me in the T&T
+ * 
+ * If you spot an error or typo i would be glad if you
+ * informed me.
+ * 
+ * for a better experience go to:
+ *https://www.khanacademy.org/cs/013/4614563845586944?width=1000&&height=600&&editor=no
+ * note that some apps may not work properly but other will work better
+ * 
+ * Full Change Log:
+ * {
+ * Features & Updates:
+ * > = added
+ * < = remove
+ * ^ = updated 
+ * ! = anouncement
+ * 
+ * > Loading screen scene 
+ * > login scene 
+ * > desktop scene 
+ * > settings scene
+ * > home menu scene 
+ * > restart scene 
+ * > sleep scene 
+ * > apps
+ * > painting game
+ * > checkboxes
+ * ^ Checkboxes now work
+ * > disabling sound effects
+ * > more settings like background
+ * > key & star functions by: Awesome man 21
+ * > mouse over apps for name
+ * < removed sound effects (they were too loud)
+ * > Fish Tank App
+ * ^ username & password now work
+ * ^ doc displays over apps and move in and out
+ * > now apps can be minimized
+ * > if you press Shift + Q it will quit the app that open
+ * > if you press Shift + M it will minimize the open app
+ * > there is now a calculator thanks to: Awesome Man 21, and Me
+ * ^ redid the login and most everything else {
+     * > multiply accounts
+     * > desktop: draggable apps
+     * ^ redid the settings page
+    }
+ * > 
+ * }
+ * 
+ * credit:
+ * Awesome Man 21: for helping as a collaborater.
+*/
+
+var clicking = false, clickTime = 0;
+var clicking1 = false, clickTime1 = 0;
+var dblclicking = false, dblclickTime = 0;
+var keys = [], typeing = false, keyTime = 0;
+
+// default button colors will change with scheme
+var btncol = color(41, 41, 41),btnbg = color(247, 247, 247);
+var cursorLayer = createGraphics(width,height,P2D);
+
+function toImg (func,x,y,w,h) {
+    func();
+    
+    return get(x, y, w, h);
+}
+
+function Input(x,y, w,h, placeHolder) {
+    this.x = x;
+    this.y = y;
+    this.h = h;
+    this.w = w;
+    
+    this.focused = false;
+    
+    this.placeHolder = placeHolder;
+    this.placeHolderColor = color(110, 110, 110);
+    this.placeHolderTxtSize = 11;
+    
+    this.color = color(20, 20, 20);
+    this.stroke = color(110);
+    this.focusStroke = color(23, 23, 23);
+    this.bg = color(250, 250, 250);
+    
+    this.txtSize = 15;
+    this.txt = [];
+    
+    this.draw = function() {
+        if (mouseX > this.x && mouseX < this.x+this.w && mouseY > this.y && mouseY < this.y +this.h && clicking) {
+            this.focused = true;
+        } else if (clicking) {
+            this.focused = false;
+        }
+        
+        if (typeing && this.focused && this.txt.length*(this.txtSize*0.55) < this.w) {
+            if (keys[8]) {
+                this.txt.splice(this.txt.length-1,2);
+            } else {
+                this.txt.push(key);
+            }
+        }
+        
+        pushMatrix();
+        if (this.focused) {
+            stroke(this.focusStroke);
+        } else {
+            stroke(this.stroke);
+        }
+        fill(this.bg);
+        rect(this.x,this.y,this.w,this.h,2);
+        
+        textAlign(CORNER);
+        textSize(this.placeHolderTxtSize);
+        fill(this.placeHolderColor);
+        text(this.placeHolder,this.x+4,this.y+this.txtSize);
+        
+        fill(this.bg);
+        noStroke();
+        rect(this.x+1,this.y+1,this.txt.length*(this.txtSize/2),this.h-1,2);
+        
+        textAlign(CENTER);
+        textSize(this.txtSize);
+        fill(this.color);
+        for (var i = 0 ; i < this.txt.length ; i++) {
+            text(this.txt[i],10+this.x+i*this.txtSize/2,this.y+this.txtSize);  
+        }
+        if (frameCount%80 > 40 && this.focused) {
+            text('|',3+this.x+this.txt.length*this.txtSize/2,this.y+this.txtSize); 
+        }
+        popMatrix();
+    };
+}
+
+function button(x,y, w,h, txt, cb,mo, bg,col, r) {
+    if (!bg) {
+        bg = btnbg;
+    }
+    if (!col) {
+        col = btncol;
+    }
+    if (!r) {r = 2;}
+    fill(bg);
+    rect(x,y,w,h,r);
+    textAlign(CENTER);
+    fill(col);
+    text(txt,x+w/2,y+h/2);
+    
+    if (mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h) {
+        fill(0,50);
+        rect(x,y,w,h,r);
+        fill(col);
+        text(txt,x+w/2,y+h/2);
+        if (mo) {mo();}
+        if (clicking) {
+            if (cb) {cb();}
+        }
+    }
+}
+
+function toolTip(txt, size) {
+    if (size === undefined) {
+        size = 12;
+    }
+    var x = 13;
+    var w = txt.length*size/1.6;
+    if (mouseX > width-w-10) {
+         x = -w-9;
+    }
+    cursorLayer.pushMatrix();
+    cursorLayer.fill(255, 255, 255);
+    cursorLayer.rect(mouseX+x,mouseY,w,size+2,1.5);
+    cursorLayer.fill(0);
+    cursorLayer.textAlign(CENTER);
+    cursorLayer.textSize(size);
+    cursorLayer.text(txt,mouseX+x+w/2,mouseY+size);
+    cursorLayer.popMatrix();
+}
+
+function toggle(thing,val1,val2) {
+    if (val1 === undefined) {
+        val1 = false;
+    }
+    if (val2 === undefined) {
+        val2 = false;
+    }
+    
+    if (thing === val1) {
+        thing = val2;
+    } else {
+        thing = val1;
+    }
+    
+    return thing;
+}
+
+// this function was made by Awesomw Man 21
+var key_key = function(x,y){
+    noStroke();
+    ellipse(x,y,15,15);
+    rect(x,y-5,33,7);
+    rect(x+20,y,5,10);
+    rect(x+28,y,5,10);
+};
+
+var system, s, user, users, settings, apps, scene = 'load', fastload = false;
+
+system = {
+    fonts: {
+        sans_serif: createFont('sans-serif'),
+        serif: createFont('bodoni 72'),
+        mono: createFont('andale mono'),
+        emoji: createFont('apple color emoji'),
+    },
+    img: {
+        dino: {
+            startup: [],
+        },
+    },
+    $: {
+        selectedUser: null,
+        doc_width: 9,
+    },
+    _: {
+        password: new Input(width/2-110,300, 200,30, 'password'),
+    },
+    scenes: {
+        off: function(){
+            background(0);
+            fill(255);
+            text('Click to turn on',width/2,30);
+            if (clicking) {
+                scene = 'load';
+                frameCount = 0;
+            }
+        },
+        sleep: function(){
+            background(0);
+            fill(255);
+            text('Click to awaken',width/2,30);
+            if (clicking) {
+                scene = 'login';
+                frameCount = 0;
+            }
+        },
+        load: function() {
+            background(255);
+            if (s.img.dino.startup[2]) {
+                fill(100,150,0);
+                textFont(system.fonts.mono,45);
+                scale(1.1+cos(frameCount)*0.2);
+                if (frameCount&45 < 15) {
+                    image(system.img.dino.startup[0],0,0);
+                } else
+                if (frameCount%45 < 30) {
+                    image(system.img.dino.startup[1],0,0);
+                } else 
+                if (frameCount%45 < 45) {
+                    image(system.img.dino.startup[2],0,0);
+                } 
+                resetMatrix();
+                
+                textAlign(CENTER);
+                textSize(50+cos(frameCount*3));
+                translate(400,200);
+                rotate(cos(frameCount*2));
+                text('Loading...',0,0);
+                resetMatrix();
+                
+                for (var i = 0; i < frameCount/15 && i < 11; i++) {
+                    pushMatrix();
+                    translate(30+i*50,height-80+cos(frameCount)*i+5);
+                    rect(0,0,30,50);
+                    popMatrix();
+                }
+                var count = 250;
+                if (fastload) {
+                    count = 10;
+                }
+                if (frameCount > count) {
+                    fill(255,frameCount-250);
+                    rect(0,0,width,height);
+                    if (frameCount > count*2+50) {
+                        scene = 'start';
+                    }
+                }
+            }else {
+                setup();
+            }
+        },
+        start: function() {
+            for (var i = 0; i < apps.length; i++) {
+                apps[i].setup();
+            }
+            var v = get(1,1);
+            background(v);
+            
+            fill(36, 166, 0);
+            textSize(60);
+            scene = 'login';
+            
+            stroke(v);
+            point(1,1);
+        }, 
+        login: function() {
+            background(255);
+                textFont(system.fonts.sans_serif,45);
+            
+            translate(400,200);
+            rotate(frameCount*0.6);
+            scale(8);
+            fill(240);
+            key_key(-15,0);
+            resetMatrix();
+            if (s.$.selectedUser) {
+                noStroke();
+                fill(2, 67, 196);
+                ellipse(width/2,100,110,110);
+                fill(44, 110, 232);
+                ellipse(width/2,80,40,40);
+                rect(width/2-30,110,60,30, 10);
+                fill(26, 26, 26);
+                textSize(65);
+                text(s.$.selectedUser.name,width/2,215);
+                textSize(16);
+                button(0,0,50,50, 'back',function(){
+                    btncol = user.pref.scheme.input.color;
+                    btnbg = user.pref.scheme.input.bg;
+                    s.$.selectedUser = null;
+                },null,color(255),color(25));
+                s._.password.txtSize = 26;
+                s._.password.placeHolderTxtSize = 24;
+                s._.password.draw();
+                stroke(100);
+                button(width/2+61,300,50,30,'',function(){
+                    if (join(s._.password.txt,'') === s.$.selectedUser.password) {
+                        user = s.$.selectedUser;
+                        s.$.selectedUser = null;
+                        scene = 'desktop';
+                    }
+                },null,color(2,67,196));
+                fill(255,255,0);
+                key_key(width/2+73,315);
+            } else {
+                for (var i = 0; i < users.length; i++) {
+                    noStroke();
+                    fill(2, 67, 196);
+                    ellipse(width/2-150+i*150,100,100,100);
+                    fill(44, 110, 232);
+                    ellipse(width/2-150+i*150,80,30,30);
+                    rect(width/2-150-25+i*150,105,50,25, 10);
+                    fill(26, 26, 26);
+                    textSize(50);
+                    text(users[i].name,width/2-150+i*150,200);
+                    if (mouseIsPressed &&
+                    mouseX > width/2-170+i*150-30 &&
+                    mouseX < width/2-170+i*150+70 &&
+                    mouseY > 100-40 && mouseY < 100+100) {
+                        s.$.selectedUser = users[i];
+                        s._.password.txt = [];
+                    }
+                }
+            }
+        },
+        desktop: function() {
+        user.pref.background();
+        textFont(s.fonts.mono);
+            
+        for (var i = 0 ; i < apps.length ; i++) {
+            if (apps[i].x) {
+                pushMatrix();
+                translate(apps[i].x,apps[i].y);
+                apps[i].icon();
+                fill(0);
+                stroke(255);
+                strokeWeight(15);
+                textSize(12);
+                text(apps[i].name,user.pref.doc_width/2,user.pref.doc_width+10);
+                popMatrix();
+                if (mouseX > apps[i].x-(apps[i].w-user.pref.doc_width) && mouseX < apps[i].x+apps[i].w && mouseY > apps[i].y-(apps[i].w-user.pref.doc_width) && mouseY < apps[i].y+apps[i].w) {
+                    if (mouseIsPressed) {
+                        apps[i].x = mouseX - user.pref.doc_width/2;
+                        apps[i].y = mouseY - user.pref.doc_width/2;
+                        apps[i].w = 600;
+                    } else {
+                        apps[i].w = user.pref.doc_width;
+                        apps[i].x = constrain(apps[i].x,0,width-apps[i].w);
+                        apps[i].y = constrain(apps[i].y,0,height-apps[i].w);
+                        
+                for (var j = 0 ; j < apps.length ; j++) {
+                    if (apps[j].x && j !== i) {
+                        if (apps[i].x === apps[j].x && apps[i].y === apps[j].y) {
+                apps[i].x += [-apps[i].w,0,apps[i].w][round(random(2))];
+                apps[i].y += [-apps[i].w,0,apps[i].w][round(random(2))];
+                        }
+                    }
+                    
+                    if (dblclicking && !apps[j].open) {
+                        if (!apps[i].minimized) {
+                            apps[i].setup();
+                        }
+                        apps[i].minimized = false;
+                        apps[i].open = true;
+                    }
+                }
+                    }
+                }
+            }
+        }
+        for (var i = 0 ; i < apps.length ; i++) {
+            if (apps[i].open) {
+                apps[i].display();
+                if (keys[16]) {
+                    if (keys[81]) {
+                        apps[i].open = false;
+                    } else if (keys[77]) {
+                        apps[i].open = false;
+                        apps[i].minimized = true;
+                    }
+                }
+            }
+        }
+        
+        fill(user.pref.scheme.bg);
+        stroke(user.pref.scheme.input.stroke);
+        strokeWeight(0.5);
+        rect(-1,-1,s.$.doc_width+1,height,0,6,6,0);
+        
+        if (mouseX < s.$.doc_width && s.$.doc_width < user.pref.doc_width) {
+            s.$.doc_width+=10;
+        } else if (s.$.doc_width > 18 && mouseX > s.$.doc_width) {
+            s.$.doc_width-=10;
+        }
+       
+        
+        for (var i = 0 ; i < apps.length ; i++) {
+            pushMatrix();
+            translate((-user.pref.doc_width)+s.$.doc_width,i*user.pref.doc_width);
+            apps[i].icon();
+            popMatrix();
+            
+            if (mouseX < s.$.doc_width && mouseY > i*user.pref.doc_width && mouseY < user.pref.doc_width+i*user.pref.doc_width) {
+                toolTip(apps[i].name,15);
+                
+                if (clicking && !apps[i].open) {
+                    if (!apps[i].minimized) {
+                        apps[i].setup();
+                    }
+                    apps[i].minimized = false;
+                    apps[i].open = true;
+                    for (var j = 0 ; j < apps.length; j++) {
+                        if (j !== i) {
+                            apps[j].open = false;
+                            apps[j].minimized = true;
+                        }
+                    }
+                }
+            }
+        }
+        },
+        settings: function() {
+            background(user.pref.scheme.bg);
+            
+            button(0,0,100,40, 'Back', function(){
+                scene = 'desktop';
+            },null,user.pref.scheme.bg);
+            
+            var schemebtncol;
+            
+            if (user.pref.scheme === settings.pref.scheme_dark) {
+                schemebtncol = color(31, 31, 31);
+            } else {
+                schemebtncol = color(0, 186, 59);
+            }
+            
+            button(50,75, 120,50, 'light scheme', function(){
+                user.pref.scheme = toggle(user.pref.scheme,settings.pref.scheme_light,settings.pref.scheme_dark);
+            
+            btncol = user.pref.scheme.input.color;
+            btnbg = user.pref.scheme.input.bg;
+            },null,schemebtncol);
+        },
+    },
+};
+
+s = system;
+
+settings = {
+    pref: {
+        scheme_light: {
+            color: color(20, 20, 20),
+            bg: color(232, 232, 232),
+            input: {
+                stroke: color(107, 105, 105),
+                bg: color(163, 160, 160),
+                color: color(43, 42, 42),
+                check: color(0, 164, 252),
+            },
+            
+            button: {
+                bg: color(33,0,77),
+                color: color(189, 0, 0),
+            },
+            cursor_col: 255,
+            cursor_stroke: 0,
+        },
+        scheme_dark: {
+            color: color(252, 249, 252),
+            bg: color(31, 31, 31),
+            input: {
+                stroke: color(186),
+                bg: color(50),
+                color: color(240),
+                check: color(0, 153, 255),
+            },
+            
+            button: {
+                bg: color(33,0,77),
+                color: color(189, 0, 0),
+            },
+            
+            cursor_col: 0,
+            cursor_stroke: 255,
+        },
+    },
+};
+
+user = {
+    pref: {
+        doc_pos: 'left',
+        doc_width: 50,
+        
+        background: function () {
+            background(255);
+        },
+        
+        scheme: settings.pref.scheme_dark,
+    },
+};
+
+users = [
+    {
+        name: 'dev0',
+        password: '000',
+        pref: {
+            doc_pos: 'left',
+            doc_width: 50,
+            
+            background: function () {
+                background(0, 250, 192);
+            },
+            
+            scheme: settings.pref.scheme_dark,
+        },
+    },
+    {
+        name: '-_-',
+        password: 'why',
+        
+        pref: {
+            doc_pos: 'left',
+            doc_width: 50,
+            
+            background: function () {
+                background(39, 3, 102);
+            },
+            
+            scheme: settings.pref.scheme_dark,
+        },
+    },
+    {
+        name: 'guest',
+        password: '',
+        pref: user.pref,
+    }
+];
+
+apps = [
+    {
+        name: 'menu',
+        icon: function() {
+            fill(user.pref.scheme.input.stroke);
+            rect(0,5,40,7);
+            rect(0,17,40,7);
+            rect(0,28,40,7);
+        },
+        setup: function() {
+            this.w = 1;
+            
+            this.display = function() {
+                if (this.w < 250-s.$.doc_width) {
+                    this.w += this.w/5;
+                }
+                if (this.w > 250-s.$.doc_width) {
+                    this.w = 250-s.$.doc_width-5;
+                }
+                textSize(12);
+                stroke(user.pref.scheme.input.stroke);
+                fill(user.pref.scheme.bg);
+                rect(s.$.doc_width,0,this.w,150);
+                noStroke();
+                
+                btnbg = user.pref.scheme.bg;
+                btncol = user.pref.scheme.color;
+                
+                button(s.$.doc_width,0,this.w/3,50, 'off',function(){
+                scene = 'off';
+                apps[0].open = false;
+                });
+                button(s.$.doc_width+this.w/3,0,this.w/3,50, 'restart',function(){
+                scene = 'load';
+                frameCount = 0;
+                apps[0].open = false;
+                });
+                button(s.$.doc_width+(this.w/3*2),0,this.w/3,50, 'sleep',function(){
+                scene = 'sleep';
+                apps[0].open = false;
+                });
+                button(s.$.doc_width,50,this.w,50, 'settings',function(){
+                scene = 'settings';
+                apps[0].open = false;
+                });
+                button(s.$.doc_width,100,this.w,50, 'close',function(){
+                apps[0].open = false;
+                });
+            };
+        },
+    }, // menu
+    {
+        name: 'Calculator',
+        x:40,
+        y:10,
+        w:70,
+        icon: function() {
+            fill(64, 64, 64);
+            rect(13-5,0,25,35,3);
+            fill(20, 20, 20);
+            rect(17-5,4,18,7);
+            for (var i = 0 ; i < 4; i++) {
+                for (var j = 0 ; j < 4; j++) {
+                    fill(222, 222, 222);
+                    ellipse(18-5+i*5,15+j*5,4,4);
+                }
+            }
+        },
+        setup: function() {
+            smooth(); // IDK what it does but I have seen it on other programs so I put it XD
+
+// Button function [
+var opacity = 0;
+var Button = function (x, y, text, toPage, w, h) {
+this.x = x;
+this.y = y;
+this.text = text;
+this.toPage = toPage;
+this.w = w;
+this.h = h;
+};
+Button.prototype.display = function () {
+fill(255, 255, 255);
+ellipse(this.x, this.y, this.w, this.h);
+textAlign(CENTER, CENTER);
+textSize(20);
+pushMatrix();
+fill(255, 0, 0);
+text(this.text, this.x, this.y);
+popMatrix();
+resetMatrix();
+this.clicked();
+};
+Button.prototype.hover = function () {
+if (dist(mouseX, mouseY, this.x, this.y) <= this.w / 2) {
+fill(87, 74, 56);
+ellipse(this.x, this.y, this.w, this.h);
+fill(255);
+text(this.text, this.x, this.y);
+cursor(HAND);
+}
+};
+Button.prototype.clicked = function () {
+if (dist(mouseX, mouseY, this.x, this.y) <= this.w / 2) {
+this.clicking = true;
+} else {
+this.clicking = false;
+}
+};
+
+var Up = new Button(74, 309, "+", 2, 20, 20);
+
+var Down = new Button(74, 345, "-", 2, 20, 20);
+// ]
+
+
+
+var value1 = 0;
+var value2 = 0;
+var decimal1;
+var decimal2;
+
+var sign = ' ';
+var outputs = [];
+var Button_Size = width/11;
+// Buttons [
+var zero = new Button(width/2.5, height/1.14, "0", 2, Button_Size, Button_Size);
+var one = new Button(width/5, height/2.4, "1", 2, Button_Size, Button_Size);
+var two = new Button(width/2.5, height/2.4, "2", 2, Button_Size, Button_Size);
+var three = new Button(width/1.7, height/2.4, "3", 2, Button_Size, Button_Size);
+var four = new Button(width/5, height/1.75, "4", 2, Button_Size, Button_Size);
+var five = new Button(width/2.5, height/1.75, "5", 2, Button_Size, Button_Size);
+var six = new Button(width/1.7, height/1.75, "6", 2, Button_Size, Button_Size);
+var seven = new Button(width/5, height/1.38, "7", 2, Button_Size, Button_Size);
+var eight = new Button(width/2.5, height/1.38, "8", 2, Button_Size, Button_Size);
+var nine = new Button(width/1.7, height/1.38, "9", 2, Button_Size, Button_Size);
+var decimal = new Button(width/1.7, height/1.14, ".", 2, Button_Size, Button_Size);
+var minus = new Button(width/1.3, height/1.14, "-", 2, Button_Size, Button_Size);
+var plus = new Button(width/1.3, height/1.38, "+", 2, Button_Size, Button_Size);
+var multiply = new Button(width/1.3, height/2.4, "x", 2, Button_Size, Button_Size);
+var divide = new Button(width/1.3, height/1.75, "/", 2,Button_Size, Button_Size);
+var enter = new Button(width/5, height/1.14, "=", 2, Button_Size, Button_Size);
+var c = new Button(width/1.3-Button_Size/6.6, height/3.9, "c", 2, Button_Size, Button_Size);
+// ]
+
+function _10(v) {
+    if (v === 1) {
+        value1 *= 10;
+    } else {
+        value2 *= 10;
+    }
+}
+
+function zeroclicked() {
+   if (value1 < 1) {
+        value1 = 0;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 0;
+    } else if (sign !== ' ') {
+        _10(2);
+    } else {
+        _10(1);
+    }
+}
+function oneclicked() {
+    if (value1 < 1) {
+        value1 = 1;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 1;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=1;
+    } else {
+        _10(1);
+        value1+=1;
+    }
+}
+function twoclicked() {
+    if (value1 < 1) {
+        value1 = 2;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 2;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=2;
+    } else {
+        _10(1);
+        value1+=2;
+    }
+}
+function threeclicked() {
+    if (value1 < 1) {
+        value1 = 3;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 3;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=3;
+    } else {
+        _10(1);
+        value1+=3;
+    }
+}
+function fourclicked() {
+    if (value1 < 1) {
+        value1 = 4;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 4;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=4;
+    } else {
+        _10(1);
+        value1+=4;
+    }
+}
+function fiveclicked() {
+    if (value1 < 1) {
+        value1 = 5;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 5;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=5;
+    } else {
+        _10(1);
+        value1+=5;
+    }
+}
+function sixclicked() {
+    if (value1 < 1) {
+        value1 = 6;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 6;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=6;
+    } else {
+        _10(1);
+        value1+=6;
+    }
+}
+function sevenclicked() {
+    if (value1 < 1) {
+        value1 = 7;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 7;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=7;
+    } else {
+        _10(1);
+        value1+=7;
+    }
+}
+function eightclicked() {
+    if (value1 < 1) {
+        value1 = 8;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 8;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=8;
+    } else {
+        _10(1);
+        value1+=8;
+    }
+}
+function nineclicked() {
+    if (value1 < 1) {
+        value1 = 9;
+    } else if (value2 < 1 && sign !== ' ') {
+        value2 = 9;
+    } else if (sign !== ' ') {
+        _10(2);
+        value2+=9;
+    } else {
+        _10(1);
+        value1+=9;
+    }
+}
+
+function decimalclicked() {
+    if (sign !== ' ') {
+        decimal1 = true;
+    } else {
+        decimal2 = true;
+    }
+}
+
+function plusclicked() {
+    sign = '+';
+}
+function minusclicked() {
+    sign = '-';
+}
+function multiplyclicked() {
+    sign = '*';
+}
+function divideclicked() {
+    sign = '/';
+}
+
+function enterclicked() {
+    var math = value1+sign+value2;
+    var value;
+    switch (sign) {
+        case '*':
+            value = value1*value2;
+            break;
+        case '/':
+            value = value1/value2;
+            break;
+        case '+':
+            value = value1+value2;
+            break;
+        case '-':
+            value = value1-value2;
+            break;
+    }
+    outputs.push(math+' = '+value);
+    value1 = value;
+    value2 = 0;
+    sign = ' ';
+}
+
+function cclicked() {
+    value1 = 0;
+    value2 = 0;
+    sign = ' ';
+}
+
+this.display = function() {
+    background(69, 107, 140);
+    strokeWeight(0.5);
+    fill(117, 117, 117);
+    rect(width/7.2,height/5.5,width/1.43,height/7);
+    zero.display();
+    one.display();
+    two.display();
+    three.display();
+    four.display();
+    five.display();
+    six.display();
+    seven.display();
+    eight.display();
+    nine.display();
+    decimal.display();
+    plus.display();
+    minus.display();
+    multiply.display();
+    divide.display();
+    enter.display();
+    c.display();
+    text(value1+sign+value2,width/2.3,height/4);
+    for (var i = 0 ; i < outputs.length; i++) {
+        text(outputs[i],width/2,15+i*20);
+        if (15+i*20 > height/5.5) {
+            outputs.splice(0,1);
+        }
+    }
+    if (clicking) {
+        if (zero.clicking) {
+            zeroclicked();
+        } else if (one.clicking) {
+            oneclicked();
+        } else if (two.clicking) {
+            twoclicked();
+        } else if (three.clicking) {
+            threeclicked();
+        } else if (four.clicking) {
+            fourclicked();
+        } else if (five.clicking) {
+            fiveclicked();
+        } else if (six.clicking) {
+            sixclicked();
+        } else if (seven.clicking) {
+            sevenclicked();
+        } else if (eight.clicking) {
+            eightclicked();
+        } else if (nine.clicking) {
+            nineclicked();
+        } else if (decimal.clicking) {
+            decimalclicked();
+        } else if (plus.clicking) {
+            plusclicked();
+        } else if (minus.clicking) {
+            minusclicked();
+        } else if (multiply.clicking) {
+            multiplyclicked();
+        } else if (divide.clicking) {
+            divideclicked();
+        } else if (enter.clicking) {
+            enterclicked();
+        }else if (c.clicking) {
+            cclicked();
+        }
+    }
+    
+    // X button
+    fill(173, 0, 0);
+    rect(width-25,5,20,20,3);
+    fill(255, 43, 43);
+    text('X',width-15,15);
+    if (mouseX > width-25 && mouseY < 25 && clicking) {
+        this.open = false;
+    }
+    // – button
+    fill(3, 171, 0);
+    rect(width-50,5,20,20,3);
+    fill(43, 255, 75);
+    text('–',width-40,15);
+    if (mouseX > width-50 && mouseX < width-30 && mouseY < 25 && clicking) {
+        this.open = false;
+        this.minimized = true;
+    }
+};
+
+        },
+    },// Calculator
+    {
+        name: 'Fish Tank',
+        x: 130,
+        y: 10,
+        w:70,
+        icon: function() {
+            image(s.img.fish,0,0,50,50);
+        },
+        setup: function() {
+            // setup {    
+    function sandHill (x,y,w,h) {
+        beginShape();
+        vertex(x, y+h);
+        bezierVertex(x+w/4,y,x+w/2,y+h/4,x+w,y+h);
+        endShape();
+    }
+    
+    function Bubble (x,y,size,speed) {
+        noStroke();
+        fill(0, 200, 255);
+        
+        if (speed === undefined) {
+            speed = 4;
+        }
+        
+        return {
+            x: x,
+            y: y,
+            size:size,
+            speed: speed,
+            draw: function () {
+                noStroke();
+                this.x += random(1,2) * cos(frameCount*random(1,2));
+                this.y -= this.speed;
+                fill(0,200,200);
+                ellipse(this.x,this.y,this.size,this.size);
+                fill(255);
+                ellipse(this.x-this.size/4,this.y-this.size/4,this.size/4,this.size/4);
+                if (this.y < -this.size) {
+                    this.y = height+this.size;
+                    this.x = random(width);
+                }
+            }
+        };
+    }
+    
+    function Fish (x,y, width,height, color) {
+        return {
+            x: x,
+            y: y,
+            
+            width: width,
+            height:height,
+            
+            directionX: 2,
+            directionY: 0,
+            
+            color: color,
+            
+            draw: function (speed) {
+                fill(this.color);
+                ellipse(this.x, this.y, this.width*0.75, this.height*0.9);
+                this.x += 1 * cos(frameCount*5);
+                this.directionX += round(random(1,-1));
+                this.directionY += round(random(1,-1));
+                
+                if (this.directionY <= 0) {
+                    this.y += -noise(random(-200,200));
+                }
+                if (this.directionY >= 1) {
+                    this.y += noise(random(-200,200));
+                }
+                
+                if (this.x < -this.width) {
+                    this.x = 600+this.width;
+                }
+                if (this.x > 600+this.width) {
+                    this.x = -this.width;
+                }
+                if (this.y < -this.height) {
+                    this.y = 400+this.height;
+                }
+                if (this.y > 400+this.height) {
+                    this.y = 0-this.height;
+                }
+                
+                if (this.directionX >= 2) {
+                    this.x += speed;
+                    triangle(this.x-this.width*0.75/2, this.y, this.x-this.width*0.70, this.y-this.height/2, this.x-this.width*0.70, this.y+this.height/2);
+                }
+                if (this.directionX <= 0) {
+                    this.x -= speed;
+                    triangle(this.x+this.width*0.75/2, this.y, this.x+this.width*0.70, this.y-this.height/2, this.x+this.width*0.70, this.y+this.height/2);
+                }
+            }
+        };
+    }
+    
+    var fish = [];
+    
+    function Button (x,y,width,height,callback) {
+        rect(x,y,width,height);
+        if (mouseIsPressed && mouseX > x && mouseY > y && mouseX < x + width && mouseY < y + height) {
+            callback();
+        }
+    }
+    
+    var Size = {x:40,y:27}, fishColor = color(91, 0, 194);
+    
+    var bubbles = [];
+    
+    for (var i = 0 ; i < 30 ; i++) {
+        bubbles.push(Bubble(random(width),random(height),random(5,30),random(2,10)));
+    }
+    //}
+            textFont(system.fonts.sans_serif);
+            this.display =  function() {
+            background(89, 216, 255);
+        textSize(12);
+        
+        fill(255, 216, 166);
+        sandHill(43,290,234,112);
+        
+        //buttons
+        {
+        // i tryed to use a loop it did not work
+        fill(194, 0, 16);
+        Button(10,10,37,25,function () {fishColor = color(194, 0, 16);});
+        fill(230, 119, 0);
+        Button(56,10,37,25,function () {fishColor = color(230, 119, 0);});
+        fill(233, 250, 0);
+        Button(101,10,37,25,function () {fishColor = color(233, 250, 0);});
+        fill(0, 194, 45);
+        Button(147,10,37,25,function () {fishColor = color(0, 194, 45);});
+        fill(0, 6, 194);
+        Button(193,10,37,25,function () {fishColor = color(0, 6, 194);});
+        fill(91, 0, 194);
+        Button(239,10,37,25,function () {fishColor = color(91, 0, 194);});
+        
+        fill(0, 94, 245);
+        Button(300,10,15,10,function () {Size.x ++;});
+        fill(255, 0, 0);
+        text("+",304,19);
+        
+        fill(0, 94, 245);
+        Button(300,25,15,10,function () {Size.x --;});
+        fill(255, 0, 0);
+        text("-",306,34);
+        
+        text(Size.x,320,26);
+        
+        fill(0, 94, 245);
+        Button(340,10,15,10,function () {Size.y ++;});
+        fill(255, 0, 0);
+        text("+",344,19);
+        
+        fill(0, 94, 245);
+        Button(340,25,15,10,function () {Size.y --;});
+        fill(255, 0, 0);
+        text("-",346,34);
+        }
+        
+        text(Size.y,360,26);
+        
+        for (var i = 0 ; i < fish.length ; i++) {
+            fish[i].draw(fish[i].width/fish[i].height);
+        }
+        
+        for (var i = 0 ; i < bubbles.length ; i++) {
+            bubbles[i].draw();
+        }
+        
+        if (frameCount < 100) {
+                textSize(40);
+                fill(237, 119, 0);
+                text("Click to create fish",20,80);
+        }
+        if (mouseY > 50 && clicking) {
+            fish.push(Fish(mouseX,mouseY,Size.x,Size.y,fishColor));
+        }
+        
+        textSize(20);
+        fill(242, 43, 12);
+        text('x',width-10,10);
+        if (mouseX > width-20 && mouseY < 20 && clicking) {
+            this.open = false;
+        }
+        fill(5, 107, 0);
+        text('–',width-30,10);
+        if (mouseX > width-40 && mouseX < width-20 && mouseY < 20 && clicking) {
+            this.open = false;
+            this.minimized = true;
+        }
+        };
+        }
+    },// Fish tank
+];
+
+function setup() {
+cursorLayer.textFont(s.fonts.mono);
+    system.img.dino.startup[0] = toImg(function () {
+    /**
+     * this code was written by: awsomeman21
+    **/
+    
+// https://www.khanacademy.org/computer-programming/pixel-art-tutorial-read-code/6359920164290560 for the tutorial tysm =D.
+// Please sub to me if you want to see more things like this =D : https://www.khanacademy.org/computer-programming/awesome-man-21s-sub-page/5793917568499712
+
+var Rex = [
+    
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "---------------------aaaaaaaaaa----------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abb-bbbbbbba---------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abbbbb---------------------------",
+     "---------a----------abbbbbbbba-----------------------",
+     "--------aba--------abbbbba---------------------------",
+     "--------aba-------abbbbbba---------------------------",
+     "--------abba------abbbbbbaaaa------------------------",
+     "--------abbba----abbbbbbbbbbba-----------------------",
+     "--------abbbbbbbbbbbbbbbbbaaba-----------------------",
+     "--------abbbbbbbbbbbbbbbbba-a------------------------",
+     "---------abbbbbbbbbbbbbbba---------------------------",
+     "----------abbbbbbbbbbbbba----------------------------",
+     "-----------abbbbbbbbbbba-----------------------------",
+     "------------abbbbbbbbba------------------------------",
+     "-------------abbbbbbba-------------------------------",
+     "-------------abbbabba--------------------------------",
+     "-------------abba-aba--------------------------------",
+     "-------------abba-aba--------------------------------",
+     "-------------abba-abba-------------------------------",
+     "--------------aa---aa--------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+];
+var rex = {
+    "-": function() {
+    noFill(); 
+    },
+    "a": function() {
+    fill(0, 0, 0);
+    },
+    "b": function() {
+    fill(194, 10, 255);
+    },
+};
+for (var y = 0; y < Rex.length; y++) {
+        for (var x = 0; x < Rex[y].length; x++) {
+            var type = Rex[y][x];
+            noStroke();
+            rex[type]();
+            rect(x*7, y*7, 7, 7);
+        }
+    }
+
+},0,0,width,height);
+system.img.dino.startup[1] = toImg(function () {
+    /**
+     * this code is by: awsomeman21
+    **/
+    // https://www.khanacademy.org/computer-programming/pixel-art-tutorial-read-code/6359920164290560 for the tutorial tysm =D.
+// Please sub to me if you want to see more things like this =D : https://www.khanacademy.org/computer-programming/awesome-man-21s-sub-page/5793917568499712
+
+background(255, 255, 255);
+var Rex = [
+    
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "---------------------aaaaaaaaaa------------d----------",
+     "--------------------abbbbbbbbbba----------d-d--------",
+     "--------------------abbbbbbbbbba---------d-----------",
+     "--------------------abb-bbbbbbba-----aaaadaaaa-----------",
+     "--------------------abbbbbbbbbba-----acccaccca-------",
+     "--------------------abbbbbbbbbba-----accccccca--------",
+     "--------------------abbbbbbbbbba------aaaaaaa--------",
+     "--------------------abbbbb---------------------------",
+     "---------a----------abbbbbbbba-----------------------",
+     "--------aba--------abbbbba---------------------------",
+     "--------aba-------abbbbbba---------------------------",
+     "--------abba------abbbbbbaaaa------------------------",
+     "--------abbba----abbbbbbbbbbba-----------------------",
+     "--------abbbbbbbbbbbbbbbbbaaba-----------------------",
+     "--------abbbbbbbbbbbbbbbbba-a------------------------",
+     "---------abbbbbbbbbbbbbbba---------------------------",
+     "----------abbbbbbbbbbbbba----------------------------",
+     "-----------abbbbbbbbbbba-----------------------------",
+     "------------abbbbbbbbba------------------------------",
+     "-------------abbbbbbba-------------------------------",
+     "-------------abbbabba-----------------------------------",
+     "-------------abba-aba--------------------------------",
+     "-------------abba-aba--------------------------------",
+     "-------------abba-abba--------------------------------",
+     "--------------aa---aa--------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+];
+var rex = {
+    "-": function() {
+    noFill(); 
+    },
+    "a": function() {
+    fill(0, 0, 0);
+    },
+    "b": function() {
+    fill(194, 10, 255);
+    },
+    "c": function() {
+    fill(255, 68, 0);
+    },
+    "d": function() {
+    fill(59, 255, 10);
+    },
+};
+for (var y = 0; y < Rex.length; y++) {
+        for (var x = 0; x < Rex[y].length; x++) {
+            var type = Rex[y][x];
+            noStroke();
+            rex[type]();
+            rect(x*7, y*7, 7, 7);
+        }
+    }
+},0,0,width,height);
+system.img.dino.startup[2] = toImg(function () {
+        background(20,25,20);
+    /**
+     * this code it by: awsomeman21
+    **/
+    // https://www.khanacademy.org/computer-programming/pixel-art-tutorial-read-code/6359920164290560 for the tutorial tysm =D.
+// Please sub to me if you want to see more things like this =D : https://www.khanacademy.org/computer-programming/awesome-man-21s-sub-page/5793917568499712
+
+background(255, 255, 255);
+var Rex = [
+    
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "----------------------------d-------------------------",
+     "---------------------------d-d-------------------------",
+     "--------------------------d--------------------------",
+     "---------------------aaaaaaaaaa----------------------",
+     "--------------------abbcbbbbbbba---------------------",
+     "--------------------abbbbbbbbcca---------------------",
+     "--------------------abb-bcbbccca---------------------",
+     "--------------------abbbcbbbccca---------------------",
+     "--------------------abbbbcbbccca---------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abbbbb---------------------------",
+     "---------a----------abbbbbbbba-----------------------",
+     "--------aba--------abbbbba---------------------------",
+     "--------aba-------abbbbbba---------------------------",
+     "--------abba------abbbbbbaaaa------------------------",
+     "--------abbba----abbbbbbbbbbba-----------------------",
+     "--------abbbbbbbbbbbbbbbbbaaba-----------------------",
+     "--------abbbbbbbbbbbbbbbbba-a------------------------",
+     "---------abbbbbbbbbbbbbbba---------------------------",
+     "----------abbbbbbbbbbbbba----------------------------",
+     "-----------abbbbbbbbbbba-----------------------------",
+     "------------abbbbbbbbba------------------------------",
+     "-------------abbbbbbba-------------------------------",
+     "-------------abbbabba-----------------------------------",
+     "-------------abba-aba--------------------------------",
+     "-------------abba-aba--------------------------------",
+     "-------------abba-abba--------------------------------",
+     "--------------aa---aa--------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+];
+var rex = {
+    "-": function() {
+    noFill(); 
+    },
+    "a": function() {
+    fill(0, 0, 0);
+    },
+    "b": function() {
+    fill(194, 10, 255);
+    },
+    "c": function() {
+    fill(255, 68, 0);
+    },
+    "d": function() {
+    fill(59, 255, 10);
+    },
+};
+for (var y = 0; y < Rex.length; y++) {
+        for (var x = 0; x < Rex[y].length; x++) {
+            var type = Rex[y][x];
+            noStroke();
+            rex[type]();
+            rect(x*7, y*7, 7, 7);
+        }
+    }},0,0,width,height);
+    
+s.img.fish = toImg(function() {
+    /**
+     * this code is by: Awesome Man 21
+    **/
+    // https://www.khanacademy.org/computer-programming/pixel-art-tutorial-read-code/6359920164290560 for the tutorial tysm =D.
+// Please sub to me if you want to see more things like this =D : https://www.khanacademy.org/computer-programming/awesome-man-21s-sub-page/5793917568499712
+
+background(31);
+var FISH = [
+    
+     "-------------------------------------------",
+     "-------------------------------------------",
+     "-------------------------------------------",
+     "-------------------------------------------",
+     "-------------------------------------------",
+     "-------------------------------------------",
+     "-------------------------------------------",
+     "------------------------------------------",
+     "------------------------------------------",
+     "-----cc-----------------------------------",
+     "-----cc------------------------------------",
+     "-------------------------------------------",
+     "--cc---------------------------------------",
+     "--cc-------------a-------------------------",
+     "----------------ada-------aaaa-------------",
+     "------cc-------adddaa---aaddda------------",
+     "------cc------adddddda-addddaa-------------",
+     "--------------aaaaaaaaaaddda-----------aa-",
+     "---cc----aaaaaccccccccccaada----------acca",
+     "---cc---aeeeaccccccccccccaaa---------acca-",
+     "------aaaeaeaccaccccccccccccaaa------acca--",
+     "-----accaaaaacccaccccccccccccccaa----aca---",
+     "-----accccccccccaccccccccccccccccaaaacca---",
+     "-----accccbcccccaccccccccccccccccccccccca--",
+     "------abbbbccccacccccccccccccccccaaaaaacca-",
+     "-------acccccccccccccccccccccccaaaa----acca-",
+     "--------aaccccccccccccccccccccaa--------acca",
+     "----------aaaccccccccccccccaaa-----------aa-",
+     "-------------aaaaaacccccaaaddda-------------",
+     "--------------addddaaaaa--adddda------------",
+     "--------------addda--------adddda-----------",
+     "---------------adda---------aaaa------------",
+     "----------------ada-------------------------",
+     "-----------------a--------------------------",
+     "--------------------------------------------",
+];
+var fish = {
+    "-": function() {
+    noFill(); 
+    },
+    "a": function() {
+    fill(0, 0, 0);
+    },
+    "b": function() {
+    fill(255, 10, 10);
+    },
+    "c": function() {
+    fill(24, 196, 219);
+    },
+    "d": function() {
+    fill(75, 72, 79);
+    },
+    "e": function() {
+    fill(188, 245, 206);
+    },
+};
+for (var y = 0; y < FISH.length; y++) {
+        for (var x = 0; x < FISH[y].length; x++) {
+            var type = FISH[y][x];
+            noStroke();
+            fish[type]();
+            rect(x*7, y*7, 7, 7);
+        }
+    }
+},0,0,330,330);
+}
+
+cursor('none');
+draw = function() {
+    // event handling {
+    if (!mouseIsPressed) {
+        clickTime++;
+        dblclickTime ++;
+        if (clickTime === 1) {
+            if (dblclickTime < 15) {
+                dblclicking = true;
+            } else {
+                dblclicking = false;
+            }
+            dblclickTime = 0;
+            clicking = true;
+        } else {
+            clicking = false;
+            dblclicking = false;
+        }
+    } else {
+        clickTime = 0;
+        clicking = false;
+        dblclicking = false;
+    }
+    
+    if (mouseIsPressed) {
+        clickTime1++;
+        if (clickTime1 === 1) {
+            clicking1 = true;
+        } else {clicking1 = false;}
+    } else {
+        clickTime1 = 0;
+        clicking1 = false;
+    }
+    
+    if (keyIsPressed) {
+        keyTime++;
+        if (keyTime === 1) {
+            typeing = true;
+        } else {typeing = false;}
+    } else {
+        keyTime = 0;
+    }
+    // }
+    
+    s.scenes[scene]();
+    
+    cursorLayer.fill(user.pref.scheme.cursor_col);
+    cursorLayer.stroke(user.pref.scheme.cursor_stroke);
+    cursorLayer.triangle(mouseX,mouseY, mouseX-3,mouseY+20, mouseX+10,mouseY+16);
+    image(cursorLayer,0,0);
+    cursorLayer.background(0,0);
+};
+
+keyPressed = function() {
+    keys[keyCode] = true;
+};
+keyReleased = function() {
+    keys[keyCode] = false;
+};

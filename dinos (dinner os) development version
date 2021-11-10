@@ -1,0 +1,1475 @@
+
+/*
+ program id: 5220148804272128
+ 
+ api stuffs
+ 
+  authorKaid: kaid_129428899791640004323186
+  authorNickname: Shipment22
+  created: 2021-05-13T02:29:20Z
+  flaggedByUser: false
+  key: ag5zfmtoYW4tYWNhZGVteXIXCxIKU2NyYXRjaHBhZBiAgJ3ZqfaiCQw
+  spinoffCount: 4
+  sumVotesIncremented: 14
+  thumb: /computer-programming/dinos-dinner-os-development-version/5220148804272128/6546908020424704.png
+  title: dinos (dinner os) development version
+  translatedTitle: dinos (dinner os) development version
+  url: https://www.khanacademy.org/computer-programming/dinos-dinner-os-development-version/5220148804272128
+*/
+
+
+
+/** this version is allways under construction 
+ *   LTS versions {
+ https://www.khanacademy.org/cs/013/4614563845586944
+ * 
+ https://www.khanacademy.org/cs/002/5354693831639040
+ * 
+ https://www.khanacademy.org/cs/001/4850920434647040
+ *
+ https://www.khanacademy.org/cs/000/5756949775204352
+ *   }
+*/
+
+smooth();
+
+// vars for events {
+    var clicking = false, clickTime = 0; // click
+    var pressStart = false, pressTime = 0; // pressStart
+    var dblclicking = false, dblclickTime = 0;
+    var keys = [], typeing = false, keyTime = 0;
+//} vars for events
+
+// clicking handler {
+    function clickingHandler() {
+        if (!mouseIsPressed) {
+        clickTime++;
+        dblclickTime ++;
+        if (clickTime === 1) {
+            if (dblclickTime < 15) {
+                dblclicking = true;
+            } else {
+                dblclicking = false;
+            }
+            dblclickTime = 0;
+            clicking = true;
+        } else {
+            clicking = false;
+            dblclicking = false;
+        }
+    } else {
+        clickTime = 0;
+        clicking = false;
+        dblclicking = false;
+    }
+    
+    if (mouseIsPressed) {
+        pressTime++;
+        if (pressTime === 1) {
+            pressStart = true;
+        } else {pressStart = false;}
+    } else {
+        pressTime = 0;
+        pressStart = false;
+    }
+    }
+// } clicking handler
+
+// system vars{
+var setting, s, users, user;
+
+var apps, openApps = [0], appDrawOrder = [], selectedApp;
+
+var scenes, scene = 'load';
+
+var schemes, cursors, img, fonts;
+
+var loadtimer = 0, fastload = false;
+
+var timer_timer = 0;
+
+var dock_width = 45, dock_pos = 0, dock_anchor = 'left', dock_moves = true;
+var tabs_pos = 30, tabs_height = 40, tabs_move = false;
+
+var loginInput;
+
+var updateingColors = false;
+// system vars}
+
+function toImg(fn,x,y,w,h,$) {
+       fn($);
+       return get(x,y,x+w,y+h);
+}
+
+function mouseOver(x, y, w, h) {
+    return mouseX > x && mouseX < x + w && mouseY > y && mouseY < y + h;
+}
+
+function setVal(o, d) {
+    if (o) {
+        return o;
+    } else {
+        return d;
+    }
+}
+
+function Button(x, y, txt, fn, extra) {
+    var btn = user.scheme.btn;
+    extra = setVal(extra, {});
+    extra.mouseOver = setVal(extra.mouseOver, {});
+    extra.mousePressed = setVal(extra.mousePressed, {});
+    
+    this.fn = fn;
+    
+    this.x = x;
+    this.y = y;
+    
+    this.w = setVal(extra.w, btn.w);
+    this.h = setVal(extra.h, btn.h);
+    
+    this.r = setVal(extra.r, btn.r);
+    
+    this.bg = setVal(extra.bg, btn.bg);
+    this.color = setVal(extra.color, btn.color);
+    this.stroke = setVal(extra.stroke, btn.stroke);
+    
+    this.txtSz = setVal(extra.txtSz, btn.txtSz);
+    
+    this.mo = setVal(extra.mo, null);
+    
+    this.mouseOver = {
+        bg: setVal(extra.mouseOver.bg, btn.mouseOver.bg),
+        color: setVal(extra.mouseOver.color, btn.mouseOver.color),
+        stroke: setVal(extra.mouseOver.stroke, btn.mouseOver.stroke)
+    };
+    
+    this.mousePressed = {
+        bg: setVal(extra.mousePressed.bg, btn.mousePressed.bg),
+        color: setVal(extra.mousePressed.color, btn.mousePressed.color),
+        stroke: setVal(extra.mousePressed.stroke, btn.mousePressed.stroke)
+    };
+    
+    this.txt = txt;
+    
+    this.draw = function() {
+        textSize(this.txtSz);
+        
+        if (mouseOver(this.x,this.y,this.w,this.h)) {
+            if (this.mo) {
+                this.mo();
+            }
+            if (!mouseIsPressed) {
+                fill(this.mouseOver.bg);
+                stroke(this.mouseOver.stroke);
+                rect(this.x, this.y, this.w, this.h, this.r);
+                
+                fill(this.mouseOver.color);
+                text(this.txt, this.x + this.w / 2, this.y + this.h / 2);
+            } else {
+                fill(this.mousePressed.bg);
+                stroke(this.mousePressed.stroke);
+                rect(this.x, this.y, this.w, this.h, this.r);
+                
+                fill(this.mousePressed.color);
+                text(this.txt, this.x + this.w / 2, this.y + this.h / 2);
+            }
+        } else {
+            fill(this.bg);
+            stroke(this.stroke);
+            rect(this.x, this.y, this.w, this.h, this.r);
+            
+            fill(this.color);
+            text(this.txt, this.x + this.w / 2, this.y + this.h / 2);
+        }
+    };
+    
+    this.clicky = function() {
+        if (mouseOver(this.x,this.y,this.w,this.h)) {
+            this.fn();
+        }
+    };
+}
+
+function Link(x, y, txt, fn, extra) {
+    this.x = x;
+    this.y = y;
+    this.txt = txt;
+    
+    this.fn = fn;
+    
+    extra = setVal(extra, {});
+    var lnk = user.scheme.link;
+    
+    this.color = setVal(extra.color, lnk.color);
+    this.txtSz = setVal(extra.txtSz, lnk.txtSz);
+    this.underlineColor = setVal(extra.underlineColor, lnk.underlineColor);
+    this.underlineWidth = setVal(extra.underlineWidth, lnk.underlineWidth);
+    
+    this.draw = function() {
+        fill(this.color);
+        textSize(this.txtSz);
+        text(this.txt, this.x, this.y);
+        
+        var xoff = this.txt.length * this.txtSz / 4;
+        var yoff = this.txtSz / 2 + this.underlineWidth / 2;
+        if (mouseOver(this.x - xoff, this.y - yoff, xoff * 2, yoff * 2)) {
+            stroke(this.underlineColor);
+            strokeWeight(this.underlineWidth);
+            line(this.x - xoff, this.y + yoff, this.x + xoff, this.y + yoff);
+        }
+    };
+    
+    this.clicky = function() {
+        var xoff = this.txt.length * this.txtSz / 4;
+        var yoff = this.txtSz / 2 + this.underlineWidth / 2;
+        
+        if (mouseOver(this.x - xoff, this.y - yoff, xoff * 2, yoff * 2)) {
+            this.fn();
+        }
+    };
+}
+
+function Input(x,y, w,h, placeHolder) {
+    this.x = x;
+    this.y = y;
+    this.h = h;
+    this.w = w;
+    
+    this.focused = false;
+    
+    this.placeHolder = placeHolder;
+    this.placeHolderColor = color(110, 110, 110);
+    this.placeHolderTxtSize = 11;
+    
+    this.color = color(20, 20, 20);
+    this.stroke = color(110);
+    this.focusStroke = color(23, 23, 23);
+    this.bg = color(250, 250, 250);
+    
+    this.txtSize = 15;
+    this.txt = [];
+    
+    this.draw = function() {
+        pushMatrix();
+        if (this.focused) {
+            stroke(this.focusStroke);
+        } else {
+            stroke(this.stroke);
+        }
+        fill(this.bg);
+        rect(this.x,this.y,this.w,this.h,2);
+        
+        textSize(this.placeHolderTxtSize);
+        fill(this.placeHolderColor);
+        text(this.placeHolder,this.x + this.w / 2,this.y+this.h/2);
+        
+        fill(this.bg);
+        noStroke();
+        rect(this.x+1,this.y+1,this.txt.length*(this.txtSize/2),this.h-1,2);
+        
+        textSize(this.txtSize);
+        fill(this.color);
+        for (var i = 0 ; i < this.txt.length ; i++) {
+            text(this.txt[i],5+this.x+i*this.txtSize/2,this.y+this.h / 2);  
+        }
+        if (frameCount%80 > 40 && this.focused) {
+            text('|',3+this.x+this.txt.length*this.txtSize/2,this.y+this.h/2); 
+        }
+        popMatrix();
+    };
+    
+    this.update = function() {
+        if (mouseX > this.x && mouseX < this.x+this.w && mouseY > this.y && mouseY < this.y +this.h && clicking) {
+            this.focused = true;
+        } else if (clicking) {
+            this.focused = false;
+        }
+        
+        if (typeing && this.focused) {
+            if (keys[8]) {
+                this.txt.splice(this.txt.length-1,2);
+            } else {
+                this.txt.push(key);
+            }
+        }
+    };
+    
+    this.getTxt = function() {
+        return this.txt.join('');
+    };
+}
+
+function toggle(v, t1, t2) {
+    if (t1) {
+        if (v === t1) {
+            return t2;
+        } else {
+            return t1;
+        }
+    } else {
+        return !v;
+    }
+}
+
+function openApp(i) {
+    if (typeof i === 'number') {
+        openApps.push(new apps[i]());
+        selectedApp = openApps.length - 1;
+        appDrawOrder.push(selectedApp);
+    } else if (typeof i === 'string') {
+        
+    } else if (typeof i === 'function') {
+        openApps.push(new i());
+        selectedApp = openApps.length - 1;
+        appDrawOrder.push(selectedApp);
+    }
+}
+
+function drawOpenApps() {
+    for (var i = 0; i < appDrawOrder.length; i++) {
+        var index = appDrawOrder[i];
+        if (openApps[index]) {
+            openApps[index].draw();
+        }
+    }
+    
+    if (selectedApp && openApps[selectedApp]) {
+        if (openApps[selectedApp].selected) {
+            openApps[selectedApp].selected();
+        }
+    }
+}
+
+function drawTabs() {
+    noStroke();
+    var inc = 0.8;
+    if (tabs_move) {
+        if (mouseY > height - tabs_pos && tabs_pos < tabs_height) {
+            tabs_pos += inc;
+        } else if (tabs_pos > 30 && mouseY < height - tabs_pos) {
+            tabs_pos -= inc;
+        }
+    }
+    
+    fill(user.scheme.tabs_bg);
+    rect(0, height - tabs_pos, width, tabs_height + 3);
+    
+    var h = tabs_pos;
+    var w = dock_width;
+    
+    var del = false;
+    for (var i = 1; i < openApps.length; i++) {
+        textSize(13);
+        
+        var tab_w = 128;
+        var x = w + tab_w * (i - 1);
+        
+        if (selectedApp === i) {
+            fill(user.scheme.tabs_selectedbg);
+        } else {
+            fill(user.scheme.tabs_tabbg);
+        }
+        rect(x, height - h, tab_w, h);
+        
+        var xx = x + tab_w - 8;
+        var xy = height - h / 2;
+        var box_size = 7;
+        
+        var mouseOver = intersect(x, height - h, x + tab_w, height, mouseX, mouseY, mouseX, mouseY);
+        
+        if (mouseOver) {
+            fill(25,25);
+            rect(x, height - h, tab_w, h);
+            
+            if (clicking) {
+                mouseOver = intersect(mouseX, mouseY, mouseX, mouseY, xx - box_size, xy - box_size, xx + box_size, xy + box_size);
+                
+                if (mouseOver) {
+                    del = true;
+                } else {
+                    selectedApp = i;
+                    for (var j = 0; j < appDrawOrder.length; j++) {
+                        var index = appDrawOrder[j];
+                        if (index === i) {
+                            appDrawOrder.splice(j, 1);   
+                            appDrawOrder.push(i);
+                        }
+                    }
+                }
+            } else {
+                mouseOver = intersect(mouseX, mouseY, mouseX, mouseY, xx - box_size, xy - box_size, xx + box_size, xy + box_size);
+                
+                if (mouseOver) {
+                    fill(255, 0, 0);
+                    rect(x, height - h, tab_w, h);
+                }
+            }
+        }
+        fill(user.scheme.tabs_color);
+        text('x', xx, xy);
+        
+        text(openApps[i].title, x + (tab_w / 2) - box_size, xy);
+        if (del) {
+            openApps.splice(i, 1);
+            del = !del;
+            
+            if (openApps.length > 0) {
+                selectedApp = 0;
+            }
+        }
+    }
+}
+
+function displayDock() {
+    if (dock_anchor === 'left') {
+        if (dock_moves) {
+            var tt = 15;
+            if (mouseX < dock_width+(dock_pos+15) && dock_pos < -2) {
+                dock_pos += (dock_width-dock_pos)/tt;
+            } else if (mouseX > dock_width+(dock_pos+15)) {
+                dock_pos -= (dock_width+dock_pos)/tt;
+            }
+        }
+        fill(user.scheme.dock_color);
+        rect(dock_pos,0,dock_width,height);
+        
+        for (var i = 0; i < apps.length; i++) {
+            var App = new apps[i]();
+            
+            if (typeof App.icon === 'function') {
+                App.icon(dock_width / 2 + dock_pos, dock_width / 2 + i * dock_width, dock_width);
+            } else {
+                image(App.icon, dock_pos, i * dock_width, dock_width, dock_width);
+            }
+            
+            
+            if (mouseOver(0, dock_width * i, dock_width + dock_pos, i * dock_width + dock_width)) {
+                if (clicking) {
+                    openApp(i);
+                } else {
+                    noStroke();
+                    fill(user.scheme.bg);
+                    rect(dock_pos + dock_width, i * dock_width + 15,App.title.length*10,23);
+                    textAlign(LEFT, TOP);
+                    textSize(16);
+                    fill(user.scheme.txt_color);
+                    text(App.title, dock_pos + dock_width + 5, i * dock_width);
+                    textAlign(CENTER,CENTER);
+                }
+            }
+        }
+    }
+}
+
+function menu() {
+    this.title = 'menu';
+    
+    var restart = new Button(75, 25, 'reset', function() {
+        scene = 'load';
+        loadtimer = 0;
+        loginInput.txt = [];
+    },{
+        w: 100,
+        h: 100,
+    });
+    
+    var logout = new Button(195, 25, 'logout', function() {
+        scene = 'login';
+        loginInput.txt = [];
+    },{
+        w: 100,
+        h: 100,
+    });
+    
+    var off = new Button(315, 25, 'off', function() {
+        Program.restart();
+    },{
+        w: 100,
+        h: 100,
+    });
+    
+    this.draw = function() {
+        background(user.scheme.bg);
+        
+        restart.draw();
+        logout.draw();
+        off.draw();
+    };
+    
+    this.selected = function() {
+        if (clicking) {
+            restart.clicky();
+            logout.clicky();
+            off.clicky();
+        }
+    };
+}
+
+var img = {
+    dino: {
+        startup: [],
+    },
+    bcz2006: getImage("avatars/mr-pants-orange"),
+    AwesomeMan21: getImage("creatures/Hopper-Jumping"),
+    guest: getImage("avatars/questionmark"),
+};
+
+fonts = {
+    mono: createFont('monospace'),
+    sans: createFont('sans-serif'),
+};
+
+schemes = {
+    light: {
+        name: 'light',
+        bg: 255,
+        txt_color: color(31, 31, 31),
+        heading_color: color(0, 0, 0),
+        desktop_bg: color(180, 40, 255),
+        dock_color: color(232, 232, 232),
+        tabs_bg: color(163, 161, 161),
+        tabs_color: color(0, 0, 0),
+        tabs_tabbg: color(199, 199, 199),
+        tabs_selectedbg: color(230, 227, 230),
+        highlight: color(0, 140, 255),
+        
+        btn: {
+            w: 100,
+            h: 45,
+            r: 5,
+            
+            bg: color(237, 237, 237),
+            color: color(31, 31, 31),
+            stroke: color(54, 54, 54),
+            
+            txtSz: 14,
+            
+            mouseOver: {
+                bg: color(227, 227, 227),
+                color: color(0, 0, 0),
+                stroke: color(0, 4, 115),
+            },
+            
+            mousePressed: {
+                bg: color(212, 212, 212),
+                color: color(0, 0, 0),
+                stroke: color(0, 4, 115),
+            },
+        },
+        link: {
+            color: 30,
+            underlineWidth: 1,
+            underlineColor: 15,
+            txtSz: 15,
+        }
+    },
+    dark: {
+        name: 'dark',
+        bg: 50,
+        txt_color: color(227, 227, 227),
+        heading_color: color(235, 235, 235),
+        desktop_bg: color(93, 5, 140),
+        dock_color: color(54, 54, 54),
+        tabs_bg: color(41, 41, 41),
+        tabs_color: color(232, 232, 232),
+        tabs_tabbg: color(59, 59, 59),
+        tabs_selectedbg: color(31, 31, 31),
+        highlight: color(33, 255, 126),
+        
+        btn: {
+            w: 100,
+            h: 45,
+            r: 5,
+            
+            bg: 36,
+            color: 232,
+            stroke: 99,
+            
+            txtSz: 14,
+            
+            mouseOver: {
+                bg: color(23, 23, 23),
+                color: color(232),
+                stroke: color(74, 74, 74),
+            },
+            mousePressed: {
+                bg: color(23, 23, 23),
+                color: 212,
+                stroke: 100,
+            },
+        },
+        link: {
+            color: color(166, 224, 202),
+            underlineWidth: 1,
+            underlineColor: 255,
+            txtSz: 15,
+        }
+    },
+};
+
+loginInput = new Input(width / 2 - 100, 215, 200, 20, 'password');
+scenes = {
+    load: function() {
+        background(255);
+            if (img.dino.startup[2]) {
+                fill(100,150,0);
+                textFont(fonts.mono,45);
+                scale(1.1+cos(loadtimer)*0.2);
+                if (loadtimer&45 < 15) {
+                    image(img.dino.startup[0],0,0);
+                } else
+                if (loadtimer%45 < 30) {
+                    image(img.dino.startup[1],0,0);
+                } else 
+                if (loadtimer%45 < 45) {
+                    image(img.dino.startup[2],0,0);
+                } 
+                resetMatrix();
+                
+                textAlign(CENTER);
+                textSize(50+cos(loadtimer*3));
+                translate(400,200);
+                rotate(cos(loadtimer*2));
+                text('Loading...',0,0);
+                resetMatrix();
+                
+                
+                text('version 0.2.2', 350, 50);
+                
+                var count = 350;
+                if (fastload) {
+                    count = 10;
+                }
+                
+                for (var i = 0; i < loadtimer/(count/10) && i < 11; i++) {
+                    pushMatrix();
+                    translate(30+i*50,height-80+cos(loadtimer)*i+5);
+                    rect(0,0,30,50);
+                    popMatrix();
+                }
+                if (loadtimer > count) {
+                    fill(255,loadtimer-count-50);
+                    rect(0,0,width,height);
+                    if (loadtimer > count*2+50) {
+                        scene = 'login';
+                        loadtimer = 0;
+                    }
+                }
+                loadtimer++;
+            }else {
+                setup();
+                loadtimer = 0;
+            }
+    },
+    login: function() {
+        background(145, 66, 255);
+        textFont(fonts.sans);
+        if (user && loadtimer > 0) {
+             var w = 130;
+             var margin = 45;
+             var x = width/2;
+             var y = 110;
+            
+            noStroke();
+            fill(189, 239, 255, 150);
+            ellipse(x,y,w,w);
+            var w2 = w*0.7;
+            image(user.avatar,x-w2/2,y-w2/2,w2,w2);
+            fill(209, 245, 255, 200);
+            text(user.name,x-w2/user.name.length/18,y+w2);
+            
+            loginInput.update();
+            loginInput.focused = true;
+            loginInput.draw();
+            
+            if (loginInput.getTxt() === user.password) {
+                scene = 'start';
+            }
+            
+            if (!user.password) {
+                scene = 'start';
+            }
+            var d = dist(mouseX,mouseY, x,y);
+            if (pressStart && d > w * 1.5) {
+                user = null;
+            }
+        } else {
+            for (var i = 0; i < users.length; i++) {
+                var w = 110;
+                var margin = 45;
+                var xoff = (users.length/2)*w;
+                var x = width/2-xoff+i*(w+margin);
+                var y = 110;
+                
+                noStroke();
+                fill(189, 239, 255, 150);
+                ellipse(x,y,w,w);
+                var w2 = w*0.7;
+                image(users[i].avatar,x-w2/2,y-w2/2,w2,w2);
+                fill(209, 245, 255, 200);
+                textSize(25);
+                text(users[i].name,x-w2/users[i].name.length/18,y+w2);
+                
+                var alpha = 255+cos(loadtimer*1.5)*255;
+                fill(227, 254, 255, alpha);
+                textSize(50);
+                text('Please Choose a user',width/2,300);
+                
+                if (user) {
+                    user = null;
+                }
+                
+                var d = dist(mouseX,mouseY, x,y);
+                if (clicking && d < w/2) {
+                    user = users[i];
+                    loadtimer = 1;
+                    break;
+                }
+            }
+        }
+    },
+    start: function() {
+        background(145, 66, 255);
+        
+        var w = 110;
+        var w2 = w*0.7;
+        var margin = 45;
+        var x = width/2;
+        var y = 110;
+        var amt = (noise(0)*15).toFixed(2);
+            
+        if (loadtimer/65 > amt) {
+            noStroke();
+            fill(235, 254, 255, 200);
+            ellipse(x,y,w,w);
+            image(user.avatar,x-w2/2,y-w2/2,w2,w2);
+            fill(232, 250, 255, 200);
+            textSize(25);
+            text(user.name,x-w2/user.name.length/18,y+w2+20);
+            
+            text('Loaded!',x,y*2.5);
+            
+            fill(255,(loadtimer/65-(amt+3))*255);
+            rect(0,0,width,height);
+            loadtimer++;
+            if ((loadtimer/65-(amt+3))*255 > 200) {
+                scene = 'desktop';
+                timer_timer = 0;
+            }
+        } else {
+            
+            noStroke();
+            fill(235, 254, 255, 200);
+            ellipse(x,y,w,w);
+            image(user.avatar,x-w2/2,y-w2/2,w2,w2);
+            fill(232, 250, 255, 200);
+            textSize(25);
+            text(user.name,x-w2/user.name.length/18,y+w2+20);
+            
+            var rr = 80;
+            var rrr = 340;
+            
+            translate(x,y);
+            rotate(loadtimer*loadtimer/65);
+            
+            noFill();
+            stroke(0, 0, 0, 100);
+            strokeWeight(w/14);
+            arc(0,0,w+5,w+5,rr,rrr);
+            resetMatrix();
+            
+            text('Loading... '+(loadtimer/65).toFixed(2)+'/'+amt,x,y*2.5);
+            loadtimer += 1.2;
+            
+        }
+
+    },
+    desktop: function() {
+        background(user.scheme.desktop_bg);
+        
+        drawOpenApps();
+        
+        drawTabs();
+        
+        displayDock();
+        
+        var x = 6;
+        var x1 = dock_width - 6;
+        
+        var y = height - (tabs_height - 15);
+        var y1 = height - (tabs_height / 2 - 5);
+        var y2 = height - (tabs_height / 2 - 15);
+        
+        stroke(user.scheme.color);
+        line(x, y, x1, y);
+        line(x, y1, x1, y1);
+        line(x, y2, x1, y2);
+        
+        if (mouseOver(0, y - 5, x1, y2 + 5) && clicking) {
+            openApp(menu);
+        }
+        
+        if (timer_timer < 255) {
+            timer_timer += (255-timer_timer)/100;
+            fill(255,255-timer_timer);
+            rect(0,0,width,height);
+        }
+    },
+};
+
+users = [
+    {
+        name: 'BCZ',
+        password: 'thebest',
+        avatar: img.bcz2006,
+        scheme: schemes.dark,
+    },    
+    {
+        name: '-_-',
+        password: 'why',
+        avatar: img.AwesomeMan21,
+        scheme: schemes.dark,
+    },   
+    {
+        name: 'Guest',
+        password: null,
+        avatar: img.guest,
+        scheme: schemes.dark,
+    },   
+];
+
+apps = [
+    function () {
+        this.title = 'Settings';
+        
+        this.icon = function(x, y, s) {
+            pushMatrix();
+            translate(x, y);
+            rotate(dock_pos - 45);
+            
+            s = s / 2;
+            noStroke();
+            fill(87, 87, 87);
+            ellipse(0, 0, s, s);
+            
+            rect(-s / 1.3, - s / 4, s / 3, s / 2, 3);
+            rect(s / 2.5, - s / 4, s / 3, s / 2, 3);
+            
+            rect(- s / 4, - s / 1.3, s / 2, s / 3, 3);
+            rect(- s / 4, s / 2.5, s / 2, s / 3, 3);
+            
+            fill(125, 125, 125);
+            ellipse(0, 0, s / 2, s / 2);
+            
+            popMatrix();
+        };
+        
+        this.scene = 'home';
+        
+        this.scenes = {
+            home: function() {
+                
+                this.draw = function() {
+                    fill(user.scheme.txt_color);
+                    textSize(50);
+                    text('Welcome', width / 2 + 75, height / 2 - tabs_height);
+                    textSize(17);
+                    text('<-- choose a catagory', width / 2 + 75, height / 2 - tabs_height + 45);
+                    
+                };
+                
+                this.update = function() {
+                    
+                };
+            },
+            general: function() {
+                var usernameInput = new Input(170, 45, 150, 25, 'username');
+                var passwordInput = new Input(170, 75, 150, 25, 'password');
+                
+                var updateUsernameAndPassword = new Button(330, 45, 'update', function() {
+                    if (usernameInput.txt.length > 2) {
+                        user.name = usernameInput.txt.join('');
+                    }
+                    if (passwordInput.txt.length > 2) {
+                        user.password = passwordInput.txt.join('');
+                    }
+                }, {
+                    w: 100,
+                    h: 56
+                });
+                
+                var dark = new Button(465, 45, 'dark scheme', function() {
+                    if (user.scheme.name === "light") {
+                        user.scheme = schemes.dark;
+                    } else {
+                        user.scheme = schemes.light;
+                    }
+                }, {
+                    w: 100,
+                    h: 56
+                });
+                
+                this.draw = function() {
+                    fill(user.scheme.heading_color);
+                    textSize(30);
+                    text('general', 220, 16);
+                    
+                    usernameInput.draw();
+                    passwordInput.draw();
+                    updateUsernameAndPassword.draw();
+                    
+                    var col = user.scheme.btn.bg;
+                    if (user.scheme.name === 'dark') {
+                        col = user.scheme.highlight;
+                    }
+                    dark.bg = col;
+                    dark.draw();
+                };
+                
+                this.update = function() {
+                    usernameInput.update();
+                    passwordInput.update();
+                    if (clicking) {
+                        updateUsernameAndPassword.clicky();
+                        dark.clicky();
+                    }
+                };
+            },
+            "app bar": function() {
+                
+                var col = user.scheme.btn.bg;
+                if (!dock_moves) {
+                    col = color(17, 255, 0);
+                }
+                var button1 = new Button(190, 60, 'lock apps bar', function() {
+                    dock_moves = !dock_moves;
+                }, {
+                    bg: col, 
+                    mouseOver: {
+                        bg: col
+                    }
+                });
+                
+                var sizes = [
+                    new Link(225, 195, '30px',function() {
+                        dock_width = 30;
+                    }),
+                    new Link(225, 215, '45px',function() {
+                        dock_width = 45;
+                    }),
+                    new Link(225, 235, '60px',function() {
+                        dock_width = 60;
+                    }),
+                    new Link(225, 255, '75px',function() {
+                        dock_width = 75;
+                    }),
+                    new Link(233, 285, 'Titanic\n(150px)',function() {
+                        dock_width = 150;
+                    }),
+                ];
+                
+                var colors = [
+                    new Button(328, 189, '',function() {
+                        user.scheme.dock_color = color(255, 0, 0);
+                    }, {
+                        w: 60,
+                        h: 20,
+                        
+                        bg: color(255, 0, 0),
+                        
+                        mouseOver: {
+                            bg: color(255, 76, 76)
+                        }
+                    }),
+                    new Button(328, 216, '',function() {
+                        user.scheme.dock_color = color(255, 136, 0);
+                    }, {
+                        w: 60,
+                        h: 20,
+                        
+                        bg: color(255, 120, 0),
+                        
+                        mouseOver: {
+                            bg: color(255, 136, 0)
+                        }
+                    }),
+                    new Button(328, 242, '',function() {
+                        user.scheme.dock_color = color(255, 255, 0);
+                    }, {
+                        w: 60,
+                        h: 20,
+                        
+                        bg: color(255, 255, 0),
+                        
+                        mouseOver: {
+                            bg: color(243, 255, 110)
+                        }
+                    }),
+                    new Button(328, 268, '',function() {
+                        user.scheme.dock_color = color(0, 227, 0);
+                    }, {
+                        w: 60,
+                        h: 20,
+                        
+                        bg: color(0, 227, 0),
+                        
+                        mouseOver: {
+                            bg: color(124, 222, 71)
+                        }
+                    }),
+                    new Button(328, 293, '',function() {
+                        user.scheme.dock_color = color(0, 0, 255);
+                    }, {
+                        w: 60,
+                        h: 20,
+                        
+                        bg: color(0,0,255),
+                        
+                        mouseOver: {
+                            bg: color(79, 76, 245)
+                        }
+                    }),
+                    new Button(328, 319, '',function() {
+                        user.scheme.dock_color = color(155,0,212);
+                    }, {
+                        w: 60,
+                        h: 20,
+                        
+                        bg: color(155, 0, 212),
+                        
+                        mouseOver: {
+                            bg: color(155, 61, 227)
+                        }
+                    }),
+                ];
+    
+                var alphas = [
+        new Button(459, 193, '0',function() {
+            var c = user.scheme.dock_color;
+            this.a = 0;
+            user.scheme.dock_color = color(red(c),green(c),blue(c), this.a);
+        }, {
+            w: 60,
+            h: 20,
+        }),
+        new Button(459, 220, '55',function() {
+            var c = user.scheme.dock_color;
+            this.a = 55;
+            user.scheme.dock_color = color(red(c),green(c),blue(c), this.a);
+        }, {
+            w: 60,
+            h: 20,
+        }),
+        new Button(459, 245, '100',function() {
+            var c = user.scheme.dock_color;
+            this.a = 100;
+            user.scheme.dock_color = color(red(c),green(c),blue(c), this.a);
+        }, {
+            w: 60,
+            h: 20,
+        }),
+        new Button(459, 270, '155',function() {
+            var c = user.scheme.dock_color;
+            this.a = 155;
+            user.scheme.dock_color = color(red(c),green(c),blue(c), this.a);
+        }, {
+            w: 60,
+            h: 20,
+        }),
+        new Button(459, 296, '200',function() {
+            var c = user.scheme.dock_color;
+            this.a = 200;
+            user.scheme.dock_color = color(red(c),green(c),blue(c), this.a);
+        }, {
+            w: 60,
+            h: 20,
+        }),
+        new Button(459, 322, '255',function() {
+            var c = user.scheme.dock_color;
+            this.a = 255;
+            user.scheme.dock_color = color(red(c),green(c),blue(c), this.a);
+        }, {
+            w: 60,
+            h: 20,
+        }),
+    ];
+                
+                this.draw = function() {
+                    fill(user.scheme.heading_color);
+                    textSize(25);
+                    text('App bar settings', 276, 20);
+                    
+                    
+                    var col = user.scheme.btn.bg;
+                    if (!dock_moves) {
+                        col = user.scheme.hightlight;
+                    }
+                    button1.bg = col;
+                    button1.mouseOver.bg = col;
+                    button1.draw();
+                    
+                    fill(user.scheme.heading_color);
+                    textSize(37);
+                    text('size', 220, 160);
+                    
+                    line(200, 190, 200, 310);
+                    
+                    for (var i = 0; i < sizes.length; i++) {
+                        sizes[i].draw();
+                    }
+                    
+                    
+                    fill(user.scheme.heading_color);
+                    textSize(38);
+                    text('color', 350, 159);
+                    
+                    line(320, 187, 320, 343);
+                    
+                    for (var i = 0; i < colors.length; i++) {
+                        colors[i].draw();
+                    }
+                    
+                    fill(user.scheme.heading_color);
+                    textSize(38);
+                    text('alpha', 491, 159);
+                    
+                    fill(user.scheme.desktop_bg);
+                    rect(446, 184, 85, 166, 4);
+                    
+                    line(452, 187, 452, 343);
+                    
+                    for (var i = 0; i < alphas.length; i++) {
+                        alphas[i].a = floor(map(i, 0, 5, 1, 255));
+                        alphas[i].txt = alphas[i].a-1;
+                        
+                        var c = user.scheme.dock_color;
+                        alphas[i].bg = color(red(c),green(c),blue(c), alphas[i].a);
+                        alphas[i].mouseOver.bg = color(red(c),green(c),blue(c), alphas[i].a);
+                        alphas[i].draw();
+                    }
+                    
+                    fill(user.scheme.heading_color);
+                    textSize(28);
+                    text('grey scale', 453, 46);
+                    
+                    line(358, 72, 548, 72);
+                    
+                    for (var i = 0; i < 9; i++) {
+                        var x = 365 + map(i, 0, 9, 0, 176);
+                        
+                        fill(map(i, 0, 9, 1, 300));
+                        rect(x, 77, 20, 45);
+                        
+                        if (mouseIsPressed && mouseOver(x, 77, 20, 45)) {
+                            user.scheme.dock_color = color(map(i, 0, 9, 1, 300));
+                        }
+                    }
+                    
+                    fill(user.scheme.txt_color);
+                    textSize(17);
+                    text('you have 3240 about ways the app bar can look',362,360);
+                    
+                };
+                
+                this.update = function() {
+                    if (clicking) {
+                        button1.clicky();
+                        for (var i = 0; i < sizes.length; i++) {
+                            sizes[i].clicky();
+                        }
+                        for (var i = 0; i < colors.length; i++) {
+                            colors[i].clicky();
+                        }
+                        for (var i = 0; i < colors.length; i++) {
+                            alphas[i].clicky();
+                        }
+                    }
+                    if (mouseIsPressed && mouseX > 150) {
+                        dock_pos = 0;
+                    }
+                };
+            },
+        };
+        
+        this.scenes.home = new this.scenes.home();
+        this.scenes.general = new this.scenes.general();
+        this.scenes['app bar'] = new this.scenes["app bar"]();
+        
+        var parent = this;
+        var setScene = function(s) {
+            parent.scene = s;
+        };
+        
+        var links = [
+            new Link(75,50,'general', function() {
+                setScene('general');
+            }),    
+            new Link(75,75,'app bar', function() {
+                setScene('app bar');
+            }),    
+        ];
+        this.draw = function() {
+            background(user.scheme.bg);
+            
+            this.scenes[this.scene].draw();
+            
+            noStroke();
+            fill(0, 25);
+            rect(0, 0, 150, height);
+            
+            fill(user.scheme.txt_color);
+            textSize(20);
+            text('Settings', 75, 20);
+            
+            for (var i = 0; i < links.length; i++) {
+                links[i].draw();
+            }
+        };
+        
+        this.selected = function() {
+            this.scenes[this.scene].update();
+            if (mouseIsPressed) {
+                for (var i = 0; i < links.length; i++) {
+                    links[i].clicky();
+                }
+            }
+        };
+    },
+    function() {
+        this.title = 'store';
+        
+        
+        this.icon = function(x, y, s) {
+            s /= 2;
+            fill(32, 230, 190);
+            rect(x-s/2,y-s/1.2,s,s*0.8);
+            noFill();
+            strokeWeight(2);
+            stroke(32, 230, 190);
+            arc(x,y-s/1.2,s/2,s/2,-180,0);
+        };
+        
+        this.draw = function() {
+            background(user.scheme.bg);
+            
+            fill(user.scheme.header_color);
+            text('Sorry but theres no apps here yet...\nunless you want to make one (tell me in the t&t)', 300,150);
+        };
+    },
+];
+function setup(){
+    /** Loading **/
+    // AwesomeMan21's pixels dinosuar {
+        /**
+            this dino art is by AwesomeMan21
+        **/
+        // https://www.khanacademy.org/computer-programming/pixel-art-tutorial-read-code/6359920164290560 for the tutorial tysm =D.
+    // Please sub to me if you want to see more things like this =D : https://www.khanacademy.org/computer-programming/awesome-man-21s-sub-page/5793917568499712
+    var rex = {
+        "-": function() {
+        noFill(); 
+        },
+        "a": function() {
+        fill(0, 0, 0);
+        },
+        "b": function() {
+        fill(194, 10, 255);
+        },
+        "c": function() {
+        fill(255, 68, 0);
+        },
+        "d": function() {
+        fill(59, 255, 10);
+        },
+    };
+    
+    var Rexs = [[
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "---------------------aaaaaaaaaa----------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abb-bbbbbbba---------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abbbbbbbbbba---------------------",
+     "--------------------abbbbb---------------------------",
+     "---------a----------abbbbbbbba-----------------------",
+     "--------aba--------abbbbba---------------------------",
+     "--------aba-------abbbbbba---------------------------",
+     "--------abba------abbbbbbaaaa------------------------",
+     "--------abbba----abbbbbbbbbbba-----------------------",
+     "--------abbbbbbbbbbbbbbbbbaaba-----------------------",
+     "--------abbbbbbbbbbbbbbbbba-a------------------------",
+     "---------abbbbbbbbbbbbbbba---------------------------",
+     "----------abbbbbbbbbbbbba----------------------------",
+     "-----------abbbbbbbbbbba-----------------------------",
+     "------------abbbbbbbbba------------------------------",
+     "-------------abbbbbbba-------------------------------",
+     "-------------abbbabba--------------------------------",
+     "-------------abba-aba--------------------------------",
+     "-------------abba-aba--------------------------------",
+     "-------------abba-abba-------------------------------",
+     "--------------aa---aa--------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+     "-----------------------------------------------------",
+],[
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "---------------------aaaaaaaaaa------------d----------",
+         "--------------------abbbbbbbbbba----------d-d--------",
+         "--------------------abbbbbbbbbba---------d-----------",
+         "--------------------abb-bbbbbbba-----aaaadaaaa-----------",
+         "--------------------abbbbbbbbbba-----acccaccca-------",
+         "--------------------abbbbbbbbbba-----accccccca--------",
+         "--------------------abbbbbbbbbba------aaaaaaa--------",
+         "--------------------abbbbb---------------------------",
+         "---------a----------abbbbbbbba-----------------------",
+         "--------aba--------abbbbba---------------------------",
+         "--------aba-------abbbbbba---------------------------",
+         "--------abba------abbbbbbaaaa------------------------",
+         "--------abbba----abbbbbbbbbbba-----------------------",
+         "--------abbbbbbbbbbbbbbbbbaaba-----------------------",
+         "--------abbbbbbbbbbbbbbbbba-a------------------------",
+         "---------abbbbbbbbbbbbbbba---------------------------",
+         "----------abbbbbbbbbbbbba----------------------------",
+         "-----------abbbbbbbbbbba-----------------------------",
+         "------------abbbbbbbbba------------------------------",
+         "-------------abbbbbbba-------------------------------",
+         "-------------abbbabba-----------------------------------",
+         "-------------abba-aba--------------------------------",
+         "-------------abba-aba--------------------------------",
+         "-------------abba-abba--------------------------------",
+         "--------------aa---aa--------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+    ],[
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "----------------------------d-------------------------",
+         "---------------------------d-d-------------------------",
+         "--------------------------d--------------------------",
+         "---------------------aaaaaaaaaa----------------------",
+         "--------------------abbcbbbbbbba---------------------",
+         "--------------------abbbbbbbbcca---------------------",
+         "--------------------abb-bcbbccca---------------------",
+         "--------------------abbbcbbbccca---------------------",
+         "--------------------abbbbcbbccca---------------------",
+         "--------------------abbbbbbbbbba---------------------",
+         "--------------------abbbbb---------------------------",
+         "---------a----------abbbbbbbba-----------------------",
+         "--------aba--------abbbbba---------------------------",
+         "--------aba-------abbbbbba---------------------------",
+         "--------abba------abbbbbbaaaa------------------------",
+         "--------abbba----abbbbbbbbbbba-----------------------",
+         "--------abbbbbbbbbbbbbbbbbaaba-----------------------",
+         "--------abbbbbbbbbbbbbbbbba-a------------------------",
+         "---------abbbbbbbbbbbbbbba---------------------------",
+         "----------abbbbbbbbbbbbba----------------------------",
+         "-----------abbbbbbbbbbba-----------------------------",
+         "------------abbbbbbbbba------------------------------",
+         "-------------abbbbbbba-------------------------------",
+         "-------------abbbabba-----------------------------------",
+         "-------------abba-aba--------------------------------",
+         "-------------abba-aba--------------------------------",
+         "-------------abba-abba--------------------------------",
+         "--------------aa---aa--------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+         "-----------------------------------------------------",
+    ]];
+
+    function rexs(i) {
+        var Rex = Rexs[i];
+        
+        for (var y = 0; y < Rex.length; y++) {
+            for (var x = 0; x < Rex[y].length; x++) {
+                var type = Rex[y][x];
+                noStroke();
+                rex[type]();
+                rect(x*7, y*7, 7, 7);
+            }
+        }
+    }
+    
+    for (var i = 0; i < Rexs.length; i++) {
+        background(255, 255, 255);
+        img.dino.startup[i] = toImg(rexs,0,0,width,height,i);
+    }
+    // }
+}
+
+setup();
+draw = function() {
+    textAlign(CENTER,CENTER);
+    strokeWeight(1);
+    
+    clickingHandler();
+    
+    if (keyIsPressed) {
+        keyTime++;
+        if (keyTime === 1) {
+            typeing = true;
+        } else {typeing = false;}
+    } else {
+        keyTime = 0;
+    }
+    scenes[scene]();
+};
+
+// events {
+keyPressed = function() {
+    keys[keyCode] = true;
+};
+
+keyReleased = function() {
+    keys[keyCode] = false;
+};
+//} events
